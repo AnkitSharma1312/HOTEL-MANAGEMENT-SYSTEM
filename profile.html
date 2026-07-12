@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile — Grand Luxe Hotel</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body data-page="profile">
+    <div class="app-layout">
+      <!-- ===== SIDEBAR ===== -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-logo">🏨</div>
+          <span class="sidebar-brand">Grand<span>Luxe</span></span>
+          <span class="sidebar-close" id="sidebarClose">✕</span>
+        </div>
+        <div class="sidebar-user">
+          <div class="sidebar-user-avatar" id="sidebarAvatar">GL</div>
+          <div class="sidebar-user-info">
+            <strong id="sidebarUserName">User</strong
+            ><span id="sidebarUserRole">guest</span>
+          </div>
+        </div>
+        <nav class="sidebar-nav">
+          <div class="sidebar-nav-section">
+            <div class="sidebar-nav-label">Main</div>
+            <a href="dashboard.html" class="nav-item"
+              ><span class="nav-icon">🏠</span> Dashboard</a
+            >
+            <a href="rooms.html" class="nav-item"
+              ><span class="nav-icon">🛏️</span> Rooms</a
+            >
+            <a href="booking.html" class="nav-item"
+              ><span class="nav-icon">📅</span> Bookings</a
+            >
+            <a href="profile.html" class="nav-item active"
+              ><span class="nav-icon">👤</span> My Profile</a
+            >
+          </div>
+        </nav>
+        <div class="sidebar-footer">
+          <button
+            class="nav-item"
+            id="logoutBtn"
+            style="
+              width: 100%;
+              text-align: left;
+              background: none;
+              border: none;
+              cursor: pointer;
+            "
+          >
+            <span class="nav-icon">🚪</span> Logout
+          </button>
+        </div>
+      </aside>
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+      <!-- ===== MAIN CONTENT ===== -->
+      <div class="main-content">
+        <header class="topbar">
+          <button
+            class="topbar-toggle"
+            id="sidebarToggle"
+            aria-label="Open sidebar"
+          >
+            <span></span><span></span><span></span>
+          </button>
+          <div class="topbar-title">
+            <h2>My Profile</h2>
+            <span>Manage your account details</span>
+          </div>
+          <div class="topbar-actions">
+            <button class="topbar-icon-btn">🔔</button>
+            <div class="topbar-user">
+              <div class="topbar-user-avatar" id="topbarAvatar">GL</div>
+              <span
+                style="font-size: 0.88rem; font-weight: 600"
+                id="topbarUserName"
+                >User</span
+              >
+            </div>
+          </div>
+        </header>
+
+        <main class="page-content">
+          <!-- Profile header card -->
+          <div class="profile-header-card">
+            <div class="profile-avatar" id="profileAvatarText">GL</div>
+            <div class="profile-info">
+              <h2 id="profileHeaderName">Loading...</h2>
+              <p id="profileHeaderEmail">—</p>
+              <div class="profile-meta">
+                <span class="profile-meta-item"
+                  >🎖️ Role: <strong id="profileHeaderRole">—</strong></span
+                >
+                <span class="profile-meta-item">📅 Member since 2024</span>
+                <span class="profile-meta-item">⭐ Gold Member</span>
+              </div>
+            </div>
+            <div style="margin-left: auto">
+              <div
+                style="
+                  text-align: center;
+                  background: rgba(255, 255, 255, 0.1);
+                  padding: 16px 24px;
+                  border-radius: var(--radius-md);
+                "
+              >
+                <div
+                  style="
+                    font-size: 1.8rem;
+                    font-weight: 800;
+                    color: var(--gold);
+                  "
+                >
+                  1,240
+                </div>
+                <div
+                  style="font-size: 0.82rem; color: rgba(255, 255, 255, 0.7)"
+                >
+                  Reward Points
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab nav -->
+          <div class="tab-nav">
+            <button
+              class="tab-btn active"
+              onclick="showProfileTab('personalInfo', this)"
+            >
+              Personal Info
+            </button>
+            <button class="tab-btn" onclick="showProfileTab('security', this)">
+              Security
+            </button>
+            <button
+              class="tab-btn"
+              onclick="showProfileTab('preferences', this)"
+            >
+              Preferences
+            </button>
+          </div>
+
+          <!-- ===== Personal Info Tab ===== -->
+          <div id="personalInfo">
+            <div class="card">
+              <div class="card-header"><h3>Personal Information</h3></div>
+              <div class="card-body">
+                <form id="profileForm" novalidate>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label class="form-label" for="profileFirstName"
+                        >First Name *</label
+                      >
+                      <input
+                        type="text"
+                        id="profileFirstName"
+                        class="form-control"
+                        required
+                        autocomplete="given-name"
+                      />
+                      <span class="form-error"></span>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label" for="profileLastName"
+                        >Last Name *</label
+                      >
+                      <input
+                        type="text"
+                        id="profileLastName"
+                        class="form-control"
+                        required
+                        autocomplete="family-name"
+                      />
+                      <span class="form-error"></span>
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label class="form-label" for="profileEmail"
+                        >Email Address *</label
+                      >
+                      <div class="input-group">
+                        <span class="input-icon">✉️</span>
+                        <input
+                          type="email"
+                          id="profileEmail"
+                          class="form-control"
+                          required
+                          autocomplete="email"
+                        />
+                      </div>
+                      <span class="form-error"></span>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label" for="profilePhone"
+                        >Phone Number</label
+                      >
+                      <div class="input-group">
+                        <span class="input-icon">📞</span>
+                        <input
+                          type="tel"
+                          id="profilePhone"
+                          class="form-control"
+                          autocomplete="tel"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="profileAddress"
+                      >Address</label
+                    >
+                    <textarea
+                      id="profileAddress"
+                      class="form-control"
+                      rows="2"
+                      placeholder="Your home address"
+                      autocomplete="street-address"
+                    ></textarea>
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      gap: 10px;
+                      justify-content: flex-end;
+                      margin-top: 8px;
+                    "
+                  >
+                    <button type="reset" class="btn btn-outline">Reset</button>
+                    <button type="submit" class="btn btn-primary">
+                      💾 Save Changes
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== Security Tab ===== -->
+          <div id="security" class="hidden">
+            <div class="card">
+              <div class="card-header"><h3>Change Password</h3></div>
+              <div class="card-body">
+                <form id="passwordForm" novalidate style="max-width: 480px">
+                  <div class="form-group">
+                    <label class="form-label" for="currentPassword"
+                      >Current Password</label
+                    >
+                    <div class="input-group">
+                      <span class="input-icon">🔒</span>
+                      <input
+                        type="password"
+                        id="currentPassword"
+                        class="form-control"
+                        required
+                        autocomplete="current-password"
+                      />
+                    </div>
+                    <span class="form-error"></span>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="newPassword"
+                      >New Password
+                      <span style="font-weight: 400; color: var(--text-light)"
+                        >(min. 8 chars)</span
+                      ></label
+                    >
+                    <div class="input-group">
+                      <span class="input-icon">🔑</span>
+                      <input
+                        type="password"
+                        id="newPassword"
+                        class="form-control"
+                        required
+                        autocomplete="new-password"
+                      />
+                    </div>
+                    <span class="form-error"></span>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="confirmNewPass"
+                      >Confirm New Password</label
+                    >
+                    <div class="input-group">
+                      <span class="input-icon">🔑</span>
+                      <input
+                        type="password"
+                        id="confirmNewPass"
+                        class="form-control"
+                        required
+                        autocomplete="new-password"
+                      />
+                    </div>
+                    <span class="form-error"></span>
+                  </div>
+                  <button type="submit" class="btn btn-primary">
+                    Update Password
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            <div class="card mt-3">
+              <div class="card-header"><h3>Active Sessions</h3></div>
+              <div class="card-body">
+                <div class="activity-item">
+                  <div class="activity-dot green"></div>
+                  <div class="activity-text">
+                    <strong>Current Session — Chrome on Windows</strong>
+                    <span>Active now · Grand City, GC</span>
+                  </div>
+                  <span class="badge badge-success">Current</span>
+                </div>
+                <div class="activity-item">
+                  <div class="activity-dot blue"></div>
+                  <div class="activity-text">
+                    <strong>Safari on iPhone</strong>
+                    <span>2 days ago · Grand City, GC</span>
+                  </div>
+                  <button class="btn btn-danger btn-sm">Revoke</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== Preferences Tab ===== -->
+          <div id="preferences" class="hidden">
+            <div class="card">
+              <div class="card-header"><h3>Notification Preferences</h3></div>
+              <div class="card-body">
+                <div style="display: flex; flex-direction: column; gap: 18px">
+                  <label
+                    style="
+                      display: flex;
+                      align-items: center;
+                      justify-content: space-between;
+                      cursor: pointer;
+                    "
+                  >
+                    <div>
+                      <strong>Booking Confirmations</strong>
+                      <div style="font-size: 0.85rem; color: var(--text-light)">
+                        Email when a booking is confirmed
+                      </div>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked
+                      style="
+                        accent-color: var(--royal-blue);
+                        width: 18px;
+                        height: 18px;
+                      "
+                    />
+                  </label>
+                  <div class="divider"></div>
+                  <label
+                    style="
+                      display: flex;
+                      align-items: center;
+                      justify-content: space-between;
+                      cursor: pointer;
+                    "
+                  >
+                    <div>
+                      <strong>Special Offers</strong>
+                      <div style="font-size: 0.85rem; color: var(--text-light)">
+                        Receive exclusive deals and promotions
+                      </div>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked
+                      style="
+                        accent-color: var(--royal-blue);
+                        width: 18px;
+                        height: 18px;
+                      "
+                    />
+                  </label>
+                  <div class="divider"></div>
+                  <label
+                    style="
+                      display: flex;
+                      align-items: center;
+                      justify-content: space-between;
+                      cursor: pointer;
+                    "
+                  >
+                    <div>
+                      <strong>Check-In Reminders</strong>
+                      <div style="font-size: 0.85rem; color: var(--text-light)">
+                        24-hour reminder before your stay
+                      </div>
+                    </div>
+                    <input
+                      type="checkbox"
+                      style="
+                        accent-color: var(--royal-blue);
+                        width: 18px;
+                        height: 18px;
+                      "
+                    />
+                  </label>
+                  <div class="divider"></div>
+                  <label
+                    style="
+                      display: flex;
+                      align-items: center;
+                      justify-content: space-between;
+                      cursor: pointer;
+                    "
+                  >
+                    <div>
+                      <strong>Newsletter</strong>
+                      <div style="font-size: 0.85rem; color: var(--text-light)">
+                        Monthly updates and hotel news
+                      </div>
+                    </div>
+                    <input
+                      type="checkbox"
+                      style="
+                        accent-color: var(--royal-blue);
+                        width: 18px;
+                        height: 18px;
+                      "
+                    />
+                  </label>
+                </div>
+                <div style="margin-top: 24px">
+                  <button
+                    class="btn btn-primary"
+                    onclick="Toast.success('Saved', 'Preferences updated.')"
+                  >
+                    Save Preferences
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+      function showProfileTab(tabId, btn) {
+        document
+          .querySelectorAll(".tab-btn")
+          .forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        ["personalInfo", "security", "preferences"].forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) el.classList.toggle("hidden", id !== tabId);
+        });
+      }
+    </script>
+  </body>
+</html>

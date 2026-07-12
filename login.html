@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login — Grand Luxe Hotel</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body data-page="login">
+    <div class="auth-page">
+      <a href="index.html" class="auth-back">← Back to Home</a>
+
+      <div class="auth-card">
+        <div class="auth-card-header">
+          <div class="auth-logo">🏨</div>
+          <h2>Welcome Back</h2>
+          <p>Sign in to your Grand Luxe account</p>
+        </div>
+
+        <div class="auth-card-body">
+          <form id="loginForm" novalidate>
+            <div class="form-group">
+              <label class="form-label" for="loginEmail">Email Address</label>
+              <div class="input-group">
+                <span class="input-icon">✉️</span>
+                <input
+                  type="email"
+                  id="loginEmail"
+                  class="form-control"
+                  placeholder="your@email.com"
+                  autocomplete="email"
+                  required
+                />
+              </div>
+              <span class="form-error"></span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="loginPassword">
+                Password
+                <a
+                  href="#"
+                  style="
+                    float: right;
+                    font-size: 0.82rem;
+                    color: var(--royal-blue);
+                    font-weight: 400;
+                  "
+                  >Forgot password?</a
+                >
+              </label>
+              <div class="input-group">
+                <span class="input-icon">🔒</span>
+                <input
+                  type="password"
+                  id="loginPassword"
+                  class="form-control"
+                  placeholder="Enter your password"
+                  autocomplete="current-password"
+                  required
+                />
+                <span
+                  class="toggle-password"
+                  id="togglePassword"
+                  role="button"
+                  title="Toggle visibility"
+                  >👁</span
+                >
+              </div>
+              <span class="form-error"></span>
+            </div>
+
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 20px;
+              "
+            >
+              <input
+                type="checkbox"
+                id="rememberMe"
+                style="accent-color: var(--royal-blue)"
+              />
+              <label
+                for="rememberMe"
+                style="
+                  font-size: 0.88rem;
+                  color: var(--text-mid);
+                  cursor: pointer;
+                "
+                >Remember me</label
+              >
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg">
+              Sign In
+            </button>
+          </form>
+
+          <!-- Demo credentials hint -->
+          <div class="info-box info" style="margin-top: 18px">
+            <strong>Demo accounts:</strong><br />
+            Admin: admin@grandluxe.com / admin123<br />
+            Staff: staff@grandluxe.com / staff123<br />
+            Guest: guest@grandluxe.com / guest123
+          </div>
+        </div>
+
+        <div class="auth-footer">
+          Don't have an account? <a href="register.html">Create one free</a>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>

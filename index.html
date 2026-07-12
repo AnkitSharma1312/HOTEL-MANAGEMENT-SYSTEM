@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Grand Luxe Hotel — Luxury at Its Finest</title>
+    <meta
+      name="description"
+      content="Experience unparalleled luxury at Grand Luxe Hotel. Book your dream stay with world-class amenities and personalized service."
+    />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="icon" href="assets/icons/favicon.ico" type="image/x-icon" />
+  </head>
+  <body data-page="landing">
+    <!-- ===== NAVBAR ===== -->
+    <nav class="navbar transparent" id="navbar">
+      <a href="index.html" class="nav-brand">
+        <div class="brand-icon">🏨</div>
+        <span class="brand-name">Grand<span>Luxe</span></span>
+      </a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#hero" class="active">Home</a></li>
+        <li><a href="#rooms">Rooms</a></li>
+        <li><a href="#services">Services</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <div class="nav-actions" id="navActions">
+        <a href="login.html" class="btn btn-outline-gold btn-sm">Login</a>
+        <a href="register.html" class="btn btn-gold btn-sm">Register</a>
+      </div>
+      <!-- navCta: swapped to Dashboard link by app.js when logged in -->
+      <div
+        class="nav-toggle"
+        id="navToggle"
+        aria-label="Toggle navigation"
+        role="button"
+        tabindex="0"
+      >
+        <span></span><span></span><span></span>
+      </div>
+    </nav>
+
+    <!-- ===== HERO ===== -->
+    <section class="hero" id="hero">
+      <div class="hero-bg-circles" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+      <div class="container" style="position: relative; z-index: 2">
+        <div class="hero-content">
+          <div class="hero-badge">⭐ 5-Star Luxury Experience</div>
+          <h1>Discover True<span>Luxury Living</span></h1>
+          <p>
+            Indulge in our award-winning rooms, world-class dining, and bespoke
+            services that redefine the art of hospitality.
+          </p>
+          <div class="hero-actions">
+            <a href="rooms.html" class="btn btn-gold btn-lg">Explore Rooms</a>
+            <a href="booking.html" class="btn btn-outline-gold btn-lg"
+              >Book Now</a
+            >
+          </div>
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <strong>350+</strong><span>Luxury Rooms</span>
+            </div>
+            <div class="hero-stat">
+              <strong>15K+</strong><span>Happy Guests</span>
+            </div>
+            <div class="hero-stat">
+              <strong>25+</strong><span>Years Excellence</span>
+            </div>
+            <div class="hero-stat">
+              <strong>50+</strong><span>Awards Won</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-image" aria-hidden="true">
+        <div class="hero-image-placeholder">
+          <div>🏨</div>
+          <div style="font-size: 1rem; margin-top: 12px">Grand Luxe Hotel</div>
+        </div>
+      </div>
+      <div class="scroll-indicator" aria-hidden="true">Scroll</div>
+    </section>
+
+    <!-- ===== FEATURED ROOMS ===== -->
+    <section class="section-padding rooms-section" id="rooms">
+      <div class="container">
+        <div class="text-center">
+          <h2 class="section-title">Featured <span>Rooms & Suites</span></h2>
+          <div class="title-line"></div>
+          <p class="section-subtitle">
+            From cozy deluxe rooms to opulent presidential suites, each space is
+            crafted for absolute comfort.
+          </p>
+        </div>
+        <div class="rooms-grid" id="featuredRooms">
+          <!-- Populated by app.js -->
+        </div>
+        <div class="text-center mt-3">
+          <a href="rooms.html" class="btn btn-primary btn-lg">View All Rooms</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SERVICES ===== -->
+    <section class="section-padding services-section" id="services">
+      <div class="container">
+        <div class="text-center">
+          <h2 class="section-title" style="color: var(--white)">
+            World-Class <span>Services</span>
+          </h2>
+          <div class="title-line"></div>
+          <p class="section-subtitle" style="color: rgba(255, 255, 255, 0.72)">
+            Every detail is thoughtfully curated to ensure an unforgettable
+            experience.
+          </p>
+        </div>
+        <div class="services-grid">
+          <div class="service-card">
+            <div class="service-icon">🍽️</div>
+            <h3>Fine Dining</h3>
+            <p>
+              Savor exquisite culinary creations from our Michelin-starred chefs
+              using locally sourced ingredients.
+            </p>
+          </div>
+          <div class="service-card">
+            <div class="service-icon">🧖</div>
+            <h3>Luxury Spa</h3>
+            <p>
+              Rejuvenate your body and soul with our signature treatments and
+              wellness therapies.
+            </p>
+          </div>
+          <div class="service-card">
+            <div class="service-icon">🏊</div>
+            <h3>Infinity Pool</h3>
+            <p>
+              Dive into our stunning rooftop infinity pool with panoramic city
+              views.
+            </p>
+          </div>
+          <div class="service-card">
+            <div class="service-icon">💼</div>
+            <h3>Business Center</h3>
+            <p>
+              State-of-the-art facilities for conferences, meetings, and
+              business events.
+            </p>
+          </div>
+          <div class="service-card">
+            <div class="service-icon">🚗</div>
+            <h3>Valet Parking</h3>
+            <p>Complimentary valet and concierge services available 24/7.</p>
+          </div>
+          <div class="service-card">
+            <div class="service-icon">🌿</div>
+            <h3>Garden & Events</h3>
+            <p>
+              Beautiful landscaped gardens perfect for weddings and private
+              celebrations.
+            </p>
+          </div>
+          <div class="service-card">
+            <div class="service-icon">🏋️</div>
+            <h3>Fitness Center</h3>
+            <p>
+              Fully equipped gym with personal trainers and group fitness
+              classes.
+            </p>
+          </div>
+          <div class="service-card">
+            <div class="service-icon">🛎️</div>
+            <h3>24/7 Concierge</h3>
+            <p>
+              Round-the-clock personalized service for every need and request.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== WHY CHOOSE US ===== -->
+    <section class="section-padding why-us-section">
+      <div class="container">
+        <div class="why-us-grid">
+          <div>
+            <h2 class="section-title">Why <span>Choose Us?</span></h2>
+            <div class="title-line" style="margin: 12px 0 28px"></div>
+            <p style="color: var(--text-mid); margin-bottom: 32px">
+              Grand Luxe Hotel has been setting the gold standard in luxury
+              hospitality for over 25 years.
+            </p>
+            <div class="why-us-features">
+              <div class="feature-item">
+                <div class="feature-icon">🏆</div>
+                <div class="feature-text">
+                  <h4>Award-Winning Excellence</h4>
+                  <p>
+                    Recognized globally with 50+ hospitality awards for
+                    outstanding service and guest satisfaction.
+                  </p>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">🛡️</div>
+                <div class="feature-text">
+                  <h4>Safety & Privacy</h4>
+                  <p>
+                    24/7 security, strict privacy policies, and state-of-the-art
+                    safety systems throughout the property.
+                  </p>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">🌟</div>
+                <div class="feature-text">
+                  <h4>Personalized Service</h4>
+                  <p>
+                    Our dedicated staff remembers your preferences to make every
+                    stay uniquely yours.
+                  </p>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon">📍</div>
+                <div class="feature-text">
+                  <h4>Prime Location</h4>
+                  <p>
+                    Situated in the heart of the city, steps away from major
+                    attractions and business districts.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="why-us-visual">
+            <div style="text-align: center; color: rgba(255, 255, 255, 0.3)">
+              <div style="font-size: 8rem">🏨</div>
+              <p style="font-size: 1.1rem; margin-top: 10px">
+                Grand Luxe Hotel
+              </p>
+            </div>
+            <div class="why-us-badge">
+              <strong>98%</strong>
+              <span>Guest Satisfaction Rate</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== TESTIMONIALS ===== -->
+    <section class="section-padding testimonials-section">
+      <div class="container">
+        <div class="text-center">
+          <h2 class="section-title">Guest <span>Testimonials</span></h2>
+          <div class="title-line"></div>
+          <p class="section-subtitle">
+            Don't just take our word for it — hear from our delighted guests.
+          </p>
+        </div>
+        <div class="testimonials-grid">
+          <div class="testimonial-card">
+            <p class="testimonial-text">
+              An absolutely breathtaking experience. The staff went above and
+              beyond to make our anniversary special. The suite was immaculate
+              and the dining was extraordinary.
+            </p>
+            <div class="testimonial-author">
+              <div class="author-avatar">JM</div>
+              <div class="author-info">
+                <strong>James Morrison</strong
+                ><span>Executive, New York · ★★★★★</span>
+              </div>
+            </div>
+          </div>
+          <div class="testimonial-card">
+            <p class="testimonial-text">
+              Grand Luxe is our go-to for business travel. The executive rooms
+              are perfectly equipped, concierge is fantastic, and the breakfast
+              buffet is world-class.
+            </p>
+            <div class="testimonial-author">
+              <div class="author-avatar">SC</div>
+              <div class="author-info">
+                <strong>Sarah Chen</strong><span>Director, London · ★★★★★</span>
+              </div>
+            </div>
+          </div>
+          <div class="testimonial-card">
+            <p class="testimonial-text">
+              We held our wedding reception at Grand Luxe and it was the most
+              magical night of our lives. The events team is simply phenomenal!
+            </p>
+            <div class="testimonial-author">
+              <div class="author-avatar">RP</div>
+              <div class="author-info">
+                <strong>Raj & Priya Patel</strong
+                ><span>Newlyweds, Dubai · ★★★★★</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== GALLERY ===== -->
+    <section class="section-padding gallery-section">
+      <div class="container">
+        <div class="text-center">
+          <h2 class="section-title">Photo <span>Gallery</span></h2>
+          <div class="title-line"></div>
+          <p class="section-subtitle">
+            Glimpses of the luxury that awaits you.
+          </p>
+        </div>
+        <div class="gallery-grid">
+          <div class="gallery-item">🏨</div>
+          <div class="gallery-item">🛏️</div>
+          <div class="gallery-item">🍽️</div>
+          <div class="gallery-item">🏊</div>
+          <div class="gallery-item">🌿</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== CONTACT SECTION ===== -->
+    <section class="section-padding contact-section" id="contact">
+      <div class="container">
+        <div class="text-center">
+          <h2 class="section-title">Get In <span>Touch</span></h2>
+          <div class="title-line"></div>
+          <p class="section-subtitle">
+            Have a question or special request? We'd love to hear from you.
+          </p>
+        </div>
+        <div class="contact-grid">
+          <div class="contact-info">
+            <div class="contact-info-item">
+              <div class="contact-info-icon">📍</div>
+              <div class="contact-info-text">
+                <strong>Address</strong
+                ><span>123 Luxury Avenue, Grand City, GC 10001</span>
+              </div>
+            </div>
+            <div class="contact-info-item">
+              <div class="contact-info-icon">📞</div>
+              <div class="contact-info-text">
+                <strong>Phone</strong><span>+1 (800) 123-LUXE</span>
+              </div>
+            </div>
+            <div class="contact-info-item">
+              <div class="contact-info-icon">✉️</div>
+              <div class="contact-info-text">
+                <strong>Email</strong><span>reservations@grandluxe.com</span>
+              </div>
+            </div>
+            <div class="contact-info-item">
+              <div class="contact-info-icon">🕐</div>
+              <div class="contact-info-text">
+                <strong>Check-In / Out</strong
+                ><span>Check-in: 3:00 PM · Check-out: 11:00 AM</span>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-body">
+              <h3 style="color: var(--royal-blue-dark); margin-bottom: 20px">
+                Send us a Message
+              </h3>
+              <form id="contactFormLanding" novalidate>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="contactName"
+                      >Your Name</label
+                    >
+                    <input
+                      type="text"
+                      id="contactName"
+                      class="form-control"
+                      placeholder="John Doe"
+                    />
+                    <span class="form-error"></span>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="contactEmail"
+                      >Email Address</label
+                    >
+                    <input
+                      type="email"
+                      id="contactEmail"
+                      class="form-control"
+                      placeholder="john@email.com"
+                    />
+                    <span class="form-error"></span>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="contactSubject">Subject</label>
+                  <select id="contactSubject" class="form-control">
+                    <option value="">Select subject</option>
+                    <option>Room Inquiry</option>
+                    <option>Reservation</option>
+                    <option>Special Request</option>
+                    <option>Event Planning</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="contactMessage">Message</label>
+                  <textarea
+                    id="contactMessage"
+                    class="form-control"
+                    rows="4"
+                    placeholder="Tell us how we can help..."
+                  ></textarea>
+                  <span class="form-error"></span>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                  Send Message ✉️
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-about">
+            <a href="index.html" class="nav-brand"
+              ><div class="brand-icon">🏨</div>
+              <span class="brand-name">Grand<span>Luxe</span></span></a
+            >
+            <p>
+              Setting the gold standard in luxury hospitality since 1999. Your
+              comfort is our highest priority.
+            </p>
+            <div class="footer-socials">
+              <a href="#" class="footer-social-btn" aria-label="Facebook">f</a>
+              <a href="#" class="footer-social-btn" aria-label="Twitter">t</a>
+              <a href="#" class="footer-social-btn" aria-label="Instagram"
+                >in</a
+              >
+              <a href="#" class="footer-social-btn" aria-label="LinkedIn">li</a>
+            </div>
+          </div>
+          <div class="footer-col">
+            <h4>Quick Links</h4>
+            <ul>
+              <li><a href="index.html">Home</a></li>
+              <li><a href="rooms.html">Rooms</a></li>
+              <li><a href="rooms.html">Book Now</a></li>
+              <li><a href="about.html">About Us</a></li>
+              <li><a href="contact.html">Contact</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Services</h4>
+            <ul>
+              <li><a href="#">Fine Dining</a></li>
+              <li><a href="#">Luxury Spa</a></li>
+              <li><a href="#">Event Venues</a></li>
+              <li><a href="#">Business Center</a></li>
+              <li><a href="#">Airport Transfer</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Contact</h4>
+            <ul>
+              <li><a href="#">📍 123 Luxury Ave, Grand City</a></li>
+              <li><a href="tel:+18001235893">📞 +1 (800) 123-LUXE</a></li>
+              <li>
+                <a href="mailto:reservations@grandluxe.com"
+                  >✉️ reservations@grandluxe.com</a
+                >
+              </li>
+              <li><a href="#">🕐 Check-in: 3:00 PM</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>
+          © 2025 Grand Luxe Hotel. All rights reserved. | Designed with ❤️ for
+          luxury.
+        </p>
+      </div>
+    </footer>
+
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>
