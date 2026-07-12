@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rooms — Grand Luxe Hotel</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body data-page="rooms">
+    <div class="app-layout">
+      <!-- ===== SIDEBAR ===== -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-logo">🏨</div>
+          <span class="sidebar-brand">Grand<span>Luxe</span></span>
+          <span class="sidebar-close" id="sidebarClose">✕</span>
+        </div>
+        <div class="sidebar-user">
+          <div class="sidebar-user-avatar" id="sidebarAvatar">GL</div>
+          <div class="sidebar-user-info">
+            <strong id="sidebarUserName">User</strong
+            ><span id="sidebarUserRole">guest</span>
+          </div>
+        </div>
+        <nav class="sidebar-nav">
+          <div class="sidebar-nav-section">
+            <div class="sidebar-nav-label">Main</div>
+            <a href="dashboard.html" class="nav-item"
+              ><span class="nav-icon">🏠</span> Dashboard</a
+            >
+            <a href="rooms.html" class="nav-item active"
+              ><span class="nav-icon">🛏️</span> Rooms</a
+            >
+            <a href="booking.html" class="nav-item"
+              ><span class="nav-icon">📅</span> Bookings</a
+            >
+            <a href="profile.html" class="nav-item"
+              ><span class="nav-icon">👤</span> My Profile</a
+            >
+          </div>
+          <div class="sidebar-nav-section" data-role="admin,staff">
+            <div class="sidebar-nav-label">Operations</div>
+            <a href="dashboard.html#checkins" class="nav-item"
+              ><span class="nav-icon">✅</span> Check-In/Out</a
+            >
+            <a href="dashboard.html#billing" class="nav-item"
+              ><span class="nav-icon">💳</span> Billing</a
+            >
+          </div>
+          <div class="sidebar-nav-section" data-role="admin">
+            <div class="sidebar-nav-label">Administration</div>
+            <a href="dashboard.html#guests" class="nav-item"
+              ><span class="nav-icon">👥</span> Manage Guests</a
+            >
+            <a href="dashboard.html#staff" class="nav-item"
+              ><span class="nav-icon">🧑‍💼</span> Manage Staff</a
+            >
+            <a href="dashboard.html#reports" class="nav-item"
+              ><span class="nav-icon">📊</span> Reports</a
+            >
+          </div>
+        </nav>
+        <div class="sidebar-footer">
+          <button
+            class="nav-item"
+            id="logoutBtn"
+            style="
+              width: 100%;
+              text-align: left;
+              background: none;
+              border: none;
+              cursor: pointer;
+            "
+          >
+            <span class="nav-icon">🚪</span> Logout
+          </button>
+        </div>
+      </aside>
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+      <!-- ===== MAIN CONTENT ===== -->
+      <div class="main-content">
+        <header class="topbar">
+          <button
+            class="topbar-toggle"
+            id="sidebarToggle"
+            aria-label="Open sidebar"
+          >
+            <span></span><span></span><span></span>
+          </button>
+          <div class="topbar-title">
+            <h2>Rooms & Suites</h2>
+            <span>Browse and manage hotel rooms</span>
+          </div>
+          <div class="topbar-actions">
+            <div class="topbar-search">
+              <span style="color: var(--text-light)">🔍</span>
+              <input
+                type="text"
+                id="roomSearch"
+                placeholder="Search rooms..."
+              />
+            </div>
+            <button class="topbar-icon-btn" title="Notifications">🔔</button>
+            <div class="topbar-user">
+              <div class="topbar-user-avatar" id="topbarAvatar">GL</div>
+              <span
+                style="font-size: 0.88rem; font-weight: 600"
+                id="topbarUserName"
+                >User</span
+              >
+            </div>
+          </div>
+        </header>
+
+        <main class="page-content">
+          <div class="page-header">
+            <div>
+              <h1>Rooms & Suites</h1>
+              <p>Find and manage the perfect accommodation</p>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center">
+              <span
+                id="roomsCount"
+                style="font-size: 0.88rem; color: var(--text-light)"
+              ></span>
+              <!-- Only visible to admin -->
+              <button
+                class="btn btn-primary hidden"
+                id="addRoomBtn"
+                data-role="admin"
+              >
+                + Add Room
+              </button>
+            </div>
+          </div>
+
+          <!-- Filters -->
+          <form id="roomsFilterForm">
+            <div class="rooms-filter-bar">
+              <div class="form-group">
+                <label class="form-label">Room Type</label>
+                <select id="filterRoomType" class="form-control">
+                  <option value="">All Types</option>
+                  <option>Standard</option>
+                  <option>Deluxe</option>
+                  <option>Suite</option>
+                  <option>Executive</option>
+                  <option>Presidential</option>
+                  <option>Villa</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Status</label>
+                <select id="filterRoomStatus" class="form-control">
+                  <option value="">All Status</option>
+                  <option value="available">Available</option>
+                  <option value="occupied">Occupied</option>
+                  <option value="maintenance">Maintenance</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Min Price ($)</label>
+                <input
+                  type="number"
+                  id="filterMinPrice"
+                  class="form-control"
+                  placeholder="0"
+                  min="0"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Max Price ($)</label>
+                <input
+                  type="number"
+                  id="filterMaxPrice"
+                  class="form-control"
+                  placeholder="Any"
+                  min="0"
+                />
+              </div>
+              <div
+                style="
+                  display: flex;
+                  gap: 8px;
+                  align-items: flex-end;
+                  padding-bottom: 0;
+                "
+              >
+                <button type="submit" class="btn btn-primary">🔍 Filter</button>
+                <button type="reset" class="btn btn-outline">Reset</button>
+              </div>
+            </div>
+          </form>
+
+          <!-- Rooms Grid -->
+          <div class="rooms-page-grid" id="roomsGrid">
+            <div class="page-loader" style="grid-column: 1/-1">
+              <div class="spinner"></div>
+              <span>Loading rooms...</span>
+            </div>
+          </div>
+
+          <!-- Pagination -->
+          <div class="pagination" id="roomsPagination"></div>
+        </main>
+      </div>
+    </div>
+
+    <!-- ===== ADD / EDIT ROOM MODAL (Admin) ===== -->
+    <div class="modal-overlay" id="roomModalOverlay">
+      <div class="modal modal-lg">
+        <div class="modal-header">
+          <h3 class="modal-title">Add New Room</h3>
+          <span
+            class="modal-close"
+            data-modal-close="roomModalOverlay"
+            role="button"
+            aria-label="Close"
+            >✕</span
+          >
+        </div>
+        <div class="modal-body">
+          <form id="roomFormModal" novalidate>
+            <input type="hidden" id="roomModalId" />
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="roomModalNum"
+                  >Room Number *</label
+                >
+                <input
+                  type="text"
+                  id="roomModalNum"
+                  class="form-control"
+                  placeholder="e.g. 101"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="roomModalName"
+                  >Room Name *</label
+                >
+                <input
+                  type="text"
+                  id="roomModalName"
+                  class="form-control"
+                  placeholder="e.g. Deluxe King Room"
+                  required
+                />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="roomModalType"
+                  >Room Type *</label
+                >
+                <select id="roomModalType" class="form-control" required>
+                  <option>Standard</option>
+                  <option>Deluxe</option>
+                  <option>Suite</option>
+                  <option>Executive</option>
+                  <option>Presidential</option>
+                  <option>Villa</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="roomModalStatus">Status</label>
+                <select id="roomModalStatus" class="form-control">
+                  <option value="available">Available</option>
+                  <option value="occupied">Occupied</option>
+                  <option value="maintenance">Maintenance</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="roomModalPrice"
+                  >Price per Night ($) *</label
+                >
+                <input
+                  type="number"
+                  id="roomModalPrice"
+                  class="form-control"
+                  placeholder="199"
+                  min="0"
+                  step="0.01"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="roomModalCap"
+                  >Capacity (guests)</label
+                >
+                <input
+                  type="number"
+                  id="roomModalCap"
+                  class="form-control"
+                  value="2"
+                  min="1"
+                  max="10"
+                />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="roomModalDesc">Description</label>
+              <textarea
+                id="roomModalDesc"
+                class="form-control"
+                rows="3"
+                placeholder="Describe the room..."
+              ></textarea>
+            </div>
+            <div
+              class="modal-footer"
+              style="padding: 0; border: none; margin-top: 8px"
+            >
+              <button
+                type="button"
+                class="btn btn-outline"
+                data-modal-close="roomModalOverlay"
+              >
+                Cancel
+              </button>
+              <button type="submit" class="btn btn-primary">
+                💾 Save Room
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>

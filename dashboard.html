@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard — Grand Luxe Hotel</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body data-page="dashboard">
+    <div class="app-layout">
+      <!-- ===== SIDEBAR ===== -->
+      <aside class="sidebar" id="sidebar" aria-label="Sidebar navigation">
+        <div class="sidebar-header">
+          <div class="sidebar-logo">🏨</div>
+          <span class="sidebar-brand">Grand<span>Luxe</span></span>
+          <span
+            class="sidebar-close"
+            id="sidebarClose"
+            aria-label="Close sidebar"
+            >✕</span
+          >
+        </div>
+
+        <div class="sidebar-user">
+          <div class="sidebar-user-avatar" id="sidebarAvatar">GL</div>
+          <div class="sidebar-user-info">
+            <strong id="sidebarUserName">User</strong>
+            <span id="sidebarUserRole">guest</span>
+          </div>
+        </div>
+
+        <nav class="sidebar-nav">
+          <!-- All roles -->
+          <div class="sidebar-nav-section">
+            <div class="sidebar-nav-label">Main</div>
+            <a href="dashboard.html" class="nav-item active">
+              <span class="nav-icon">🏠</span> Dashboard
+            </a>
+            <a href="rooms.html" class="nav-item">
+              <span class="nav-icon">🛏️</span> Rooms
+            </a>
+            <a href="booking.html" class="nav-item">
+              <span class="nav-icon">📅</span> Bookings
+            </a>
+            <a href="profile.html" class="nav-item">
+              <span class="nav-icon">👤</span> My Profile
+            </a>
+          </div>
+
+          <!-- Staff + Admin only -->
+          <div class="sidebar-nav-section" data-role="staff,admin">
+            <div class="sidebar-nav-label">Operations</div>
+            <a href="dashboard.html#checkins" class="nav-item">
+              <span class="nav-icon">✅</span> Check-In/Out
+              <span class="nav-badge" id="pendingCheckIns">0</span>
+            </a>
+            <a href="dashboard.html#billing" class="nav-item">
+              <span class="nav-icon">💳</span> Billing
+            </a>
+          </div>
+
+          <!-- Admin only -->
+          <div class="sidebar-nav-section" data-role="admin">
+            <div class="sidebar-nav-label">Administration</div>
+            <a href="dashboard.html#guests" class="nav-item">
+              <span class="nav-icon">👥</span> Manage Guests
+            </a>
+            <a href="dashboard.html#staff" class="nav-item">
+              <span class="nav-icon">🧑‍💼</span> Manage Staff
+            </a>
+            <a href="dashboard.html#reports" class="nav-item">
+              <span class="nav-icon">📊</span> Reports
+            </a>
+            <a href="dashboard.html#settings" class="nav-item">
+              <span class="nav-icon">⚙️</span> Settings
+            </a>
+          </div>
+
+          <div class="sidebar-nav-section">
+            <div class="sidebar-nav-label">Help</div>
+            <a href="about.html" class="nav-item"
+              ><span class="nav-icon">ℹ️</span> About</a
+            >
+            <a href="contact.html" class="nav-item"
+              ><span class="nav-icon">✉️</span> Contact</a
+            >
+          </div>
+        </nav>
+
+        <div class="sidebar-footer">
+          <button
+            class="nav-item"
+            id="logoutBtn"
+            style="
+              width: 100%;
+              text-align: left;
+              background: none;
+              border: none;
+              cursor: pointer;
+            "
+          >
+            <span class="nav-icon">🚪</span> Logout
+          </button>
+        </div>
+      </aside>
+
+      <!-- Sidebar overlay (mobile) -->
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+      <!-- ===== MAIN CONTENT ===== -->
+      <div class="main-content">
+        <!-- Topbar -->
+        <header class="topbar">
+          <button
+            class="topbar-toggle"
+            id="sidebarToggle"
+            aria-label="Open sidebar"
+          >
+            <span></span><span></span><span></span>
+          </button>
+          <div class="topbar-title">
+            <h2>Dashboard</h2>
+            <span id="dashWelcome">Welcome back!</span>
+          </div>
+          <div class="topbar-actions">
+            <div class="topbar-search">
+              <span style="color: var(--text-light)">🔍</span>
+              <input type="text" placeholder="Search..." />
+            </div>
+            <button
+              class="topbar-icon-btn"
+              title="Notifications"
+              aria-label="Notifications"
+            >
+              🔔<span class="badge"></span>
+            </button>
+            <div class="topbar-user">
+              <div class="topbar-user-avatar" id="topbarAvatar">GL</div>
+              <span
+                style="
+                  font-size: 0.88rem;
+                  font-weight: 600;
+                  color: var(--text-dark);
+                "
+                id="topbarUserName"
+                >User</span
+              >
+            </div>
+          </div>
+        </header>
+
+        <!-- Page content -->
+        <main class="page-content">
+          <!-- ===== STATS ===== -->
+          <div class="stats-grid">
+            <div class="stat-card blue">
+              <div class="stat-icon blue">🛏️</div>
+              <div class="stat-info">
+                <div class="stat-value" id="statTotalRooms">—</div>
+                <div class="stat-label">Total Rooms</div>
+                <div class="stat-change up" data-role="admin,staff">
+                  ↑ 2 added this month
+                </div>
+              </div>
+            </div>
+            <div class="stat-card gold" data-role="admin,staff">
+              <div class="stat-icon gold">🏠</div>
+              <div class="stat-info">
+                <div class="stat-value" id="statOccupied">—</div>
+                <div class="stat-label">Occupied Rooms</div>
+                <div class="stat-change up">↑ 12% from yesterday</div>
+              </div>
+            </div>
+            <div class="stat-card green" data-role="admin,staff">
+              <div class="stat-icon green">✅</div>
+              <div class="stat-info">
+                <div class="stat-value" id="statCheckIns">—</div>
+                <div class="stat-label">Check-ins Today</div>
+                <div class="stat-change up">↑ 5 more than avg</div>
+              </div>
+            </div>
+            <div class="stat-card red" data-role="admin">
+              <div class="stat-icon red">💰</div>
+              <div class="stat-info">
+                <div class="stat-value" id="statRevenue">—</div>
+                <div class="stat-label">Revenue Today</div>
+                <div class="stat-change up">↑ 8% vs yesterday</div>
+              </div>
+            </div>
+            <div class="stat-card blue" data-role="admin">
+              <div class="stat-icon blue">👥</div>
+              <div class="stat-info">
+                <div class="stat-value" id="statTotalGuests">—</div>
+                <div class="stat-label">Total Guests</div>
+                <div class="stat-change up">↑ 34 this week</div>
+              </div>
+            </div>
+            <div class="stat-card gold" data-role="admin,staff">
+              <div class="stat-icon gold">⏳</div>
+              <div class="stat-info">
+                <div class="stat-value" id="statPendingBooks">—</div>
+                <div class="stat-label">Pending Bookings</div>
+                <div class="stat-change down">Needs attention</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== ADMIN / STAFF: Main Grid ===== -->
+          <div data-role="admin,staff">
+            <div class="dashboard-grid">
+              <!-- Recent Bookings -->
+              <div class="card">
+                <div class="card-header">
+                  <h3>Recent Bookings</h3>
+                  <a href="booking.html" class="btn btn-outline btn-sm"
+                    >View All</a
+                  >
+                </div>
+                <div class="card-body" style="padding: 0">
+                  <div class="table-container">
+                    <table class="data-table">
+                      <thead>
+                        <tr>
+                          <th>#ID</th>
+                          <th>Guest</th>
+                          <th>Room</th>
+                          <th>Check-In</th>
+                          <th>Check-Out</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody id="recentBookingsTbody">
+                        <tr>
+                          <td colspan="6" class="table-empty">
+                            <div class="page-loader">
+                              <div
+                                class="spinner"
+                                style="
+                                  width: 24px;
+                                  height: 24px;
+                                  border-width: 3px;
+                                "
+                              ></div>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right column -->
+              <div style="display: flex; flex-direction: column; gap: 20px">
+                <!-- Quick Actions -->
+                <div class="card">
+                  <div class="card-header"><h3>Quick Actions</h3></div>
+                  <div class="card-body">
+                    <div class="quick-actions">
+                      <a href="booking.html" class="quick-action-btn"
+                        ><span class="qa-icon">📅</span
+                        ><span>New Booking</span></a
+                      >
+                      <a href="rooms.html" class="quick-action-btn"
+                        ><span class="qa-icon">🛏️</span><span>Add Room</span></a
+                      >
+                      <a href="dashboard.html#checkins" class="quick-action-btn"
+                        ><span class="qa-icon">✅</span><span>Check-In</span></a
+                      >
+                      <a
+                        href="dashboard.html#reports"
+                        class="quick-action-btn"
+                        data-role="admin"
+                        ><span class="qa-icon">📊</span><span>Reports</span></a
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="card">
+                  <div class="card-header"><h3>Recent Activity</h3></div>
+                  <div class="card-body" style="padding: 12px 24px">
+                    <div class="activity-list">
+                      <div class="activity-item">
+                        <div class="activity-dot green"></div>
+                        <div class="activity-text">
+                          <strong>Guest checked in — Room 204</strong
+                          ><span>2 minutes ago</span>
+                        </div>
+                        <span class="activity-time">10:32 AM</span>
+                      </div>
+                      <div class="activity-item">
+                        <div class="activity-dot blue"></div>
+                        <div class="activity-text">
+                          <strong>New booking confirmed #1042</strong
+                          ><span>15 minutes ago</span>
+                        </div>
+                        <span class="activity-time">10:19 AM</span>
+                      </div>
+                      <div class="activity-item">
+                        <div class="activity-dot gold"></div>
+                        <div class="activity-text">
+                          <strong>Room 312 — Maintenance scheduled</strong
+                          ><span>1 hour ago</span>
+                        </div>
+                        <span class="activity-time">09:30 AM</span>
+                      </div>
+                      <div class="activity-item">
+                        <div class="activity-dot red"></div>
+                        <div class="activity-text">
+                          <strong>Booking #1038 cancelled</strong
+                          ><span>2 hours ago</span>
+                        </div>
+                        <span class="activity-time">08:45 AM</span>
+                      </div>
+                      <div class="activity-item">
+                        <div class="activity-dot green"></div>
+                        <div class="activity-text">
+                          <strong>Payment received — $1,240</strong
+                          ><span>3 hours ago</span>
+                        </div>
+                        <span class="activity-time">07:58 AM</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Revenue Chart (Admin only) -->
+            <div class="card mt-3" data-role="admin">
+              <div class="card-header">
+                <h3>Weekly Revenue</h3>
+                <select
+                  class="form-control"
+                  style="width: auto; font-size: 0.85rem; padding: 6px 12px"
+                >
+                  <option>This Week</option>
+                  <option>Last Week</option>
+                  <option>This Month</option>
+                </select>
+              </div>
+              <div class="card-body">
+                <div id="revenueChart" class="chart-placeholder">
+                  <div class="chart-bars">
+                    <div class="chart-bar" style="height: 40%"></div>
+                    <div class="chart-bar" style="height: 60%"></div>
+                    <div class="chart-bar" style="height: 35%"></div>
+                    <div class="chart-bar" style="height: 80%"></div>
+                    <div class="chart-bar" style="height: 100%"></div>
+                    <div class="chart-bar" style="height: 90%"></div>
+                    <div class="chart-bar" style="height: 70%"></div>
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-around;
+                      font-size: 0.72rem;
+                      color: var(--text-light);
+                      padding: 6px 16px 0;
+                    "
+                  >
+                    <span>Mon</span><span>Tue</span><span>Wed</span
+                    ><span>Thu</span><span>Fri</span><span>Sat</span
+                    ><span>Sun</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Admin: Manage Sections -->
+            <div data-role="admin" class="mt-3">
+              <div class="dashboard-grid-3">
+                <!-- Manage Guests -->
+                <div class="card" id="guests">
+                  <div class="card-header">
+                    <h3>Guests</h3>
+                    <button
+                      class="btn btn-primary btn-sm"
+                      onclick="loadUsersTable('guest')"
+                    >
+                      Load
+                    </button>
+                  </div>
+                  <div class="card-body" style="padding: 0">
+                    <div class="table-container">
+                      <table class="data-table">
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody id="usersTbody">
+                          <tr>
+                            <td colspan="4" class="table-empty">
+                              Click "Load" to fetch guests
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Check-ins today -->
+                <div class="card" id="checkins">
+                  <div class="card-header">
+                    <h3>Today's Check-Ins</h3>
+                    <button
+                      class="btn btn-primary btn-sm"
+                      onclick="loadStaffBookings()"
+                    >
+                      Refresh
+                    </button>
+                  </div>
+                  <div class="card-body" style="padding: 0">
+                    <div class="table-container">
+                      <table class="data-table">
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>Guest</th>
+                            <th>Room</th>
+                            <th>Check-In</th>
+                            <th>Check-Out</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody id="staffBookingsTbody">
+                          <tr>
+                            <td colspan="8" class="table-empty">
+                              Click "Refresh" to load
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Reports -->
+                <div class="card" id="reports">
+                  <div class="card-header"><h3>Quick Reports</h3></div>
+                  <div class="card-body">
+                    <div
+                      style="display: flex; flex-direction: column; gap: 12px"
+                    >
+                      <button
+                        class="btn btn-outline btn-block"
+                        onclick="
+                          Toast.info(
+                            'Reports',
+                            'Generating occupancy report...',
+                          )
+                        "
+                      >
+                        📊 Occupancy Report
+                      </button>
+                      <button
+                        class="btn btn-outline btn-block"
+                        onclick="
+                          Toast.info('Reports', 'Generating revenue report...')
+                        "
+                      >
+                        💰 Revenue Report
+                      </button>
+                      <button
+                        class="btn btn-outline btn-block"
+                        onclick="
+                          Toast.info('Reports', 'Generating guest report...')
+                        "
+                      >
+                        👥 Guest Report
+                      </button>
+                      <button
+                        class="btn btn-gold btn-block"
+                        onclick="
+                          Toast.info('Export', 'Exporting data as CSV...')
+                        "
+                      >
+                        ⬇️ Export Data
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== GUEST DASHBOARD ===== -->
+          <div data-role="guest">
+            <div class="dashboard-grid">
+              <div class="card">
+                <div class="card-header">
+                  <h3>My Bookings</h3>
+                  <a href="booking.html" class="btn btn-primary btn-sm"
+                    >New Booking</a
+                  >
+                </div>
+                <div class="card-body">
+                  <div id="guestBookingsContainer">
+                    <div class="page-loader">
+                      <div
+                        class="spinner"
+                        style="width: 24px; height: 24px; border-width: 3px"
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 20px">
+                <div class="card">
+                  <div class="card-header"><h3>Quick Actions</h3></div>
+                  <div class="card-body">
+                    <div class="quick-actions">
+                      <a href="rooms.html" class="quick-action-btn"
+                        ><span class="qa-icon">🛏️</span
+                        ><span>Browse Rooms</span></a
+                      >
+                      <a href="booking.html" class="quick-action-btn"
+                        ><span class="qa-icon">📅</span
+                        ><span>Book a Room</span></a
+                      >
+                      <a href="profile.html" class="quick-action-btn"
+                        ><span class="qa-icon">👤</span
+                        ><span>My Profile</span></a
+                      >
+                      <a href="contact.html" class="quick-action-btn"
+                        ><span class="qa-icon">✉️</span
+                        ><span>Contact Us</span></a
+                      >
+                    </div>
+                  </div>
+                </div>
+                <div class="card">
+                  <div class="card-header"><h3>Loyalty Status</h3></div>
+                  <div class="card-body" style="text-align: center">
+                    <div style="font-size: 3rem; margin-bottom: 10px">⭐</div>
+                    <div
+                      style="
+                        font-size: 1.4rem;
+                        font-weight: 800;
+                        color: var(--gold-dark);
+                        margin-bottom: 4px;
+                      "
+                    >
+                      Gold Member
+                    </div>
+                    <div
+                      style="
+                        font-size: 0.88rem;
+                        color: var(--text-light);
+                        margin-bottom: 16px;
+                      "
+                    >
+                      1,240 reward points
+                    </div>
+                    <div
+                      style="
+                        background: var(--bg-light);
+                        border-radius: 30px;
+                        height: 8px;
+                        overflow: hidden;
+                      "
+                    >
+                      <div
+                        style="
+                          background: linear-gradient(
+                            90deg,
+                            var(--gold),
+                            var(--gold-light)
+                          );
+                          height: 100%;
+                          width: 62%;
+                          border-radius: 30px;
+                        "
+                      ></div>
+                    </div>
+                    <div
+                      style="
+                        font-size: 0.8rem;
+                        color: var(--text-light);
+                        margin-top: 8px;
+                      "
+                    >
+                      760 points to Platinum
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+      <!-- /main-content -->
+    </div>
+    <!-- /app-layout -->
+
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact Us — Grand Luxe Hotel</title>
+    <meta
+      name="description"
+      content="Get in touch with Grand Luxe Hotel for reservations, inquiries, and special requests."
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body data-page="contact">
+    <!-- ===== NAVBAR ===== -->
+    <nav class="navbar scrolled" id="navbar">
+      <a href="index.html" class="nav-brand">
+        <div class="brand-icon">🏨</div>
+        <span class="brand-name">Grand<span>Luxe</span></span>
+      </a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="rooms.html">Rooms</a></li>
+        <li><a href="index.html#services">Services</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html" class="active">Contact</a></li>
+      </ul>
+      <div class="nav-actions" id="navActions">
+        <a href="login.html" class="btn btn-outline-gold btn-sm">Login</a>
+        <a href="register.html" class="btn btn-gold btn-sm">Register</a>
+      </div>
+      <div
+        class="nav-toggle"
+        id="navToggle"
+        role="button"
+        tabindex="0"
+        aria-label="Toggle navigation"
+      >
+        <span></span><span></span><span></span>
+      </div>
+    </nav>
+
+    <!-- ===== HERO ===== -->
+    <section class="contact-page-hero">
+      <div class="container">
+        <div class="hero-badge" style="margin-bottom: 20px">
+          ✉️ We're Here to Help
+        </div>
+        <h1>Contact <span class="text-gold">Grand Luxe</span></h1>
+        <p>
+          Our dedicated team is available 24/7 to assist with reservations,
+          inquiries, and special requests.
+        </p>
+      </div>
+    </section>
+
+    <!-- ===== CONTACT SECTION ===== -->
+    <section class="contact-form-section">
+      <div class="container">
+        <div class="contact-page-grid">
+          <!-- Info -->
+          <div>
+            <h2 class="section-title" style="font-size: 1.8rem">
+              Get In <span>Touch</span>
+            </h2>
+            <div class="title-line" style="margin: 12px 0 28px"></div>
+            <p style="color: var(--text-mid); margin-bottom: 32px">
+              Whether you're planning your stay, need special arrangements, or
+              simply have a question, we'd love to hear from you.
+            </p>
+
+            <div
+              class="contact-info"
+              style="display: flex; flex-direction: column; gap: 20px"
+            >
+              <div class="contact-info-item">
+                <div class="contact-info-icon">📍</div>
+                <div class="contact-info-text">
+                  <strong>Our Address</strong>
+                  <span>123 Luxury Avenue, Grand City, GC 10001, USA</span>
+                </div>
+              </div>
+              <div class="contact-info-item">
+                <div class="contact-info-icon">📞</div>
+                <div class="contact-info-text">
+                  <strong>Phone</strong>
+                  <span>+1 (800) 123-LUXE (5893)</span>
+                </div>
+              </div>
+              <div class="contact-info-item">
+                <div class="contact-info-icon">✉️</div>
+                <div class="contact-info-text">
+                  <strong>Email</strong>
+                  <span>reservations@grandluxe.com</span>
+                </div>
+              </div>
+              <div class="contact-info-item">
+                <div class="contact-info-icon">🕐</div>
+                <div class="contact-info-text">
+                  <strong>Front Desk Hours</strong>
+                  <span>24 hours, 7 days a week</span>
+                </div>
+              </div>
+              <div class="contact-info-item">
+                <div class="contact-info-icon">🚗</div>
+                <div class="contact-info-text">
+                  <strong>Parking</strong>
+                  <span>Complimentary valet available daily</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Map placeholder -->
+            <div class="map-placeholder">📍</div>
+
+            <!-- Social links -->
+            <div style="margin-top: 24px">
+              <strong
+                style="
+                  color: var(--royal-blue-dark);
+                  display: block;
+                  margin-bottom: 12px;
+                "
+                >Follow Us</strong
+              >
+              <div style="display: flex; gap: 12px">
+                <a href="#" class="btn btn-outline btn-sm">📘 Facebook</a>
+                <a href="#" class="btn btn-outline btn-sm">📸 Instagram</a>
+                <a href="#" class="btn btn-outline btn-sm">🐦 Twitter</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Form -->
+          <div class="card">
+            <div class="card-header"><h3>Send a Message</h3></div>
+            <div class="card-body">
+              <form id="contactPageForm" novalidate>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="cpName">Full Name *</label>
+                    <div class="input-group">
+                      <span class="input-icon">👤</span>
+                      <input
+                        type="text"
+                        id="cpName"
+                        class="form-control"
+                        placeholder="John Doe"
+                        required
+                      />
+                    </div>
+                    <span class="form-error"></span>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="cpEmail"
+                      >Email Address *</label
+                    >
+                    <div class="input-group">
+                      <span class="input-icon">✉️</span>
+                      <input
+                        type="email"
+                        id="cpEmail"
+                        class="form-control"
+                        placeholder="john@email.com"
+                        required
+                      />
+                    </div>
+                    <span class="form-error"></span>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="cpPhone">Phone Number</label>
+                    <div class="input-group">
+                      <span class="input-icon">📞</span>
+                      <input
+                        type="tel"
+                        id="cpPhone"
+                        class="form-control"
+                        placeholder="+1 (555) 000-0000"
+                      />
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="cpSubject">Subject *</label>
+                    <select id="cpSubject" class="form-control" required>
+                      <option value="">-- Select a subject --</option>
+                      <option>Room Reservation</option>
+                      <option>Special Occasion</option>
+                      <option>Group Booking</option>
+                      <option>Event Planning</option>
+                      <option>Spa & Wellness</option>
+                      <option>Dining Reservation</option>
+                      <option>Complaint / Feedback</option>
+                      <option>General Inquiry</option>
+                      <option>Other</option>
+                    </select>
+                    <span class="form-error"></span>
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="cpCheckIn"
+                      >Preferred Check-In</label
+                    >
+                    <input type="date" id="cpCheckIn" class="form-control" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="cpGuests"
+                      >Number of Guests</label
+                    >
+                    <select id="cpGuests" class="form-control">
+                      <option value="">Select</option>
+                      <option>1</option>
+                      <option>2</option>
+                      <option>3</option>
+                      <option>4</option>
+                      <option>5+</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="cpMessage"
+                    >Your Message *</label
+                  >
+                  <textarea
+                    id="cpMessage"
+                    class="form-control"
+                    rows="5"
+                    placeholder="Tell us how we can help, or describe your ideal stay..."
+                    required
+                  ></textarea>
+                  <span class="form-error"></span>
+                </div>
+
+                <div class="info-box info">
+                  📧 We typically respond within 2 hours. For urgent requests,
+                  please call us directly.
+                </div>
+
+                <button
+                  type="submit"
+                  class="btn btn-primary btn-block btn-lg"
+                  style="margin-top: 20px"
+                >
+                  Send Message ✉️
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== FAQ ===== -->
+    <section class="section-padding" style="background: var(--bg-light)">
+      <div class="container">
+        <div class="text-center">
+          <h2 class="section-title">Frequently Asked <span>Questions</span></h2>
+          <div class="title-line"></div>
+        </div>
+        <div
+          style="
+            max-width: 720px;
+            margin: 48px auto 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+          "
+          id="faqList"
+        >
+          <!-- FAQ items generated below -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-about">
+            <a href="index.html" class="nav-brand"
+              ><div class="brand-icon">🏨</div>
+              <span class="brand-name">Grand<span>Luxe</span></span></a
+            >
+            <p>Setting the gold standard in luxury hospitality since 1999.</p>
+            <div class="footer-socials">
+              <a href="#" class="footer-social-btn">f</a>
+              <a href="#" class="footer-social-btn">t</a>
+              <a href="#" class="footer-social-btn">in</a>
+            </div>
+          </div>
+          <div class="footer-col">
+            <h4>Quick Links</h4>
+            <ul>
+              <li><a href="index.html">Home</a></li>
+              <li><a href="rooms.html">Rooms</a></li>
+              <li><a href="rooms.html">Book Now</a></li>
+              <li><a href="about.html">About</a></li>
+              <li><a href="contact.html">Contact</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Services</h4>
+            <ul>
+              <li><a href="#">Fine Dining</a></li>
+              <li><a href="#">Luxury Spa</a></li>
+              <li><a href="#">Event Venues</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Contact</h4>
+            <ul>
+              <li><a href="#">📍 123 Luxury Ave</a></li>
+              <li><a href="#">📞 +1 (800) 123-LUXE</a></li>
+              <li><a href="#">✉️ info@grandluxe.com</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2025 Grand Luxe Hotel. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+      // FAQ accordion — nav toggle is handled by initContactPage() in app.js
+      const faqs = [
+        {
+          q: "What are your check-in and check-out times?",
+          a: "Check-in is at 3:00 PM and check-out is at 11:00 AM. Early check-in and late check-out are available upon request, subject to availability.",
+        },
+        {
+          q: "Is parking available at the hotel?",
+          a: "Yes, complimentary valet parking is available 24/7 for all registered guests. Self-parking is also available in our secure underground garage.",
+        },
+        {
+          q: "Do you offer airport transfers?",
+          a: "Yes, we offer luxury airport transfers in our fleet of premium vehicles. Please contact us at least 24 hours in advance to arrange your transfer.",
+        },
+        {
+          q: "What is your cancellation policy?",
+          a: "Bookings can be cancelled free of charge up to 48 hours before the check-in date. Late cancellations may incur a one-night charge.",
+        },
+        {
+          q: "Is the spa included with my room?",
+          a: "Access to our fitness center and outdoor pool is complimentary. Spa treatments are available at an additional cost with advance booking.",
+        },
+        {
+          q: "Do you accommodate dietary requirements?",
+          a: "Absolutely. Our culinary team can accommodate all dietary requirements and allergies. Please inform us at the time of booking.",
+        },
+      ];
+
+      const faqList = document.getElementById("faqList");
+      faqs.forEach(({ q, a }) => {
+        const item = document.createElement("div");
+        item.style.cssText =
+          "background:var(--white);border-radius:var(--radius-md);border:1px solid rgba(26,35,126,0.08);overflow:hidden";
+        item.innerHTML = `
+        <button style="width:100%;padding:18px 20px;text-align:left;background:none;border:none;cursor:pointer;font-size:0.95rem;font-weight:600;color:var(--royal-blue-dark);display:flex;justify-content:space-between;align-items:center;gap:12px" onclick="toggleFaq(this)">
+          ${q} <span style="font-size:1.1rem;flex-shrink:0;transition:transform 0.2s">+</span>
+        </button>
+        <div style="display:none;padding:0 20px 18px;font-size:0.9rem;color:var(--text-mid);line-height:1.7">${a}</div>`;
+        faqList.appendChild(item);
+      });
+
+      function toggleFaq(btn) {
+        const answer = btn.nextElementSibling;
+        const icon = btn.querySelector("span");
+        const isOpen = answer.style.display !== "none";
+        answer.style.display = isOpen ? "none" : "block";
+        icon.textContent = isOpen ? "+" : "−";
+        icon.style.transform = isOpen ? "rotate(0deg)" : "rotate(45deg)";
+      }
+    </script>
+  </body>
+</html>
