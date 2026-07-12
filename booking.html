@@ -1,0 +1,824 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bookings — Grand Luxe Hotel</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+      /* Booking-page specific overrides */
+      .booking-layout {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 24px;
+        align-items: start;
+      }
+      @media (max-width: 900px) {
+        .booking-layout {
+          grid-template-columns: 1fr;
+        }
+        .booking-summary-sticky {
+          position: static !important;
+          order: -1;
+        }
+      }
+      .booking-step-panel {
+        display: none;
+      }
+      .booking-step-panel.active {
+        display: block;
+      }
+
+      /* Step connector fix */
+      .booking-steps .step::after {
+        content: "";
+        flex: 1;
+        height: 2px;
+        background: #dde2f0;
+        margin: 0 8px;
+      }
+      .booking-steps .step:last-child::after {
+        display: none;
+      }
+      .booking-steps .step.completed::after {
+        background: var(--success);
+      }
+    </style>
+  </head>
+  <body data-page="booking">
+    <div class="app-layout">
+      <!-- ===== SIDEBAR ===== -->
+      <aside class="sidebar" id="sidebar" aria-label="Sidebar navigation">
+        <div class="sidebar-header">
+          <div class="sidebar-logo">🏨</div>
+          <span class="sidebar-brand">Grand<span>Luxe</span></span>
+          <span
+            class="sidebar-close"
+            id="sidebarClose"
+            aria-label="Close sidebar"
+            >✕</span
+          >
+        </div>
+        <div class="sidebar-user">
+          <div class="sidebar-user-avatar" id="sidebarAvatar">GL</div>
+          <div class="sidebar-user-info">
+            <strong id="sidebarUserName">User</strong>
+            <span id="sidebarUserRole">guest</span>
+          </div>
+        </div>
+        <nav class="sidebar-nav">
+          <div class="sidebar-nav-section">
+            <div class="sidebar-nav-label">Main</div>
+            <a href="dashboard.html" class="nav-item"
+              ><span class="nav-icon">🏠</span> Dashboard</a
+            >
+            <a href="rooms.html" class="nav-item"
+              ><span class="nav-icon">🛏️</span> Rooms</a
+            >
+            <a href="booking.html" class="nav-item active"
+              ><span class="nav-icon">📅</span> Bookings</a
+            >
+            <a href="profile.html" class="nav-item"
+              ><span class="nav-icon">👤</span> My Profile</a
+            >
+          </div>
+          <div class="sidebar-nav-section" data-role="staff,admin">
+            <div class="sidebar-nav-label">Operations</div>
+            <a href="dashboard.html#checkins" class="nav-item"
+              ><span class="nav-icon">✅</span> Check-In/Out</a
+            >
+            <a href="dashboard.html#billing" class="nav-item"
+              ><span class="nav-icon">💳</span> Billing</a
+            >
+          </div>
+          <div class="sidebar-nav-section" data-role="admin">
+            <div class="sidebar-nav-label">Administration</div>
+            <a href="dashboard.html#guests" class="nav-item"
+              ><span class="nav-icon">👥</span> Manage Guests</a
+            >
+            <a href="dashboard.html#reports" class="nav-item"
+              ><span class="nav-icon">📊</span> Reports</a
+            >
+          </div>
+          <div class="sidebar-nav-section">
+            <div class="sidebar-nav-label">Help</div>
+            <a href="about.html" class="nav-item"
+              ><span class="nav-icon">ℹ️</span> About</a
+            >
+            <a href="contact.html" class="nav-item"
+              ><span class="nav-icon">✉️</span> Contact</a
+            >
+          </div>
+        </nav>
+        <div class="sidebar-footer">
+          <button
+            class="nav-item"
+            id="logoutBtn"
+            style="
+              width: 100%;
+              text-align: left;
+              background: none;
+              border: none;
+              cursor: pointer;
+            "
+          >
+            <span class="nav-icon">🚪</span> Logout
+          </button>
+        </div>
+      </aside>
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+      <!-- ===== MAIN CONTENT ===== -->
+      <div class="main-content">
+        <!-- Topbar -->
+        <header class="topbar">
+          <button
+            class="topbar-toggle"
+            id="sidebarToggle"
+            aria-label="Open sidebar"
+          >
+            <span></span><span></span><span></span>
+          </button>
+          <div class="topbar-title">
+            <h2>Bookings</h2>
+            <span>Manage your room reservations</span>
+          </div>
+          <div class="topbar-actions">
+            <button
+              class="topbar-icon-btn"
+              title="Notifications"
+              aria-label="Notifications"
+            >
+              🔔
+            </button>
+            <div class="topbar-user">
+              <div class="topbar-user-avatar" id="topbarAvatar">GL</div>
+              <span
+                style="
+                  font-size: 0.88rem;
+                  font-weight: 600;
+                  color: var(--text-dark);
+                "
+                id="topbarUserName"
+                >User</span
+              >
+            </div>
+          </div>
+        </header>
+
+        <main class="page-content">
+          <!-- ===== TAB NAV ===== -->
+          <div class="tab-nav" id="bookingTabNav">
+            <button
+              class="tab-btn active"
+              data-tab="newBooking"
+              onclick="switchBookingTab('newBooking', this)"
+            >
+              ➕ New Booking
+            </button>
+            <button
+              class="tab-btn"
+              data-tab="myBookings"
+              onclick="switchBookingTab('myBookings', this)"
+            >
+              📋 My Bookings
+            </button>
+            <button
+              class="tab-btn"
+              data-tab="allBookings"
+              onclick="switchBookingTab('allBookings', this)"
+              data-role="admin,staff"
+            >
+              📊 All Bookings
+            </button>
+          </div>
+
+          <!-- ================================================================ -->
+          <!--  TAB 1 — NEW BOOKING                                             -->
+          <!-- ================================================================ -->
+          <div id="tab-newBooking" class="booking-tab-content">
+            <!-- Step indicator -->
+            <div class="booking-steps" id="bookingSteps">
+              <div class="step active" id="stepIndicator1">
+                <div class="step-num">1</div>
+                <span class="step-label">Select Room</span>
+              </div>
+              <div class="step" id="stepIndicator2">
+                <div class="step-num">2</div>
+                <span class="step-label">Details</span>
+              </div>
+              <div class="step" id="stepIndicator3">
+                <div class="step-num">3</div>
+                <span class="step-label">Confirmed</span>
+              </div>
+            </div>
+
+            <div class="booking-layout">
+              <!-- Left: step panels -->
+              <div>
+                <!-- ── STEP 1: Choose room ── -->
+                <div class="booking-step-panel active card" id="stepPanel1">
+                  <div class="card-header">
+                    <h3>🛏️ Choose Your Room</h3>
+                  </div>
+                  <div class="card-body">
+                    <!-- Pre-selected room info (when coming from rooms.html?roomId=X) -->
+                    <div
+                      id="preselectedRoomBanner"
+                      class="hidden"
+                      style="
+                        background: linear-gradient(
+                          135deg,
+                          var(--royal-blue-dark),
+                          var(--royal-blue)
+                        );
+                        border-radius: var(--radius-md);
+                        padding: 16px 20px;
+                        color: var(--white);
+                        margin-bottom: 20px;
+                        display: flex;
+                        align-items: center;
+                        gap: 14px;
+                      "
+                    >
+                      <div style="font-size: 2.5rem">🛏️</div>
+                      <div id="preselectedRoomDetails" style="flex: 1"></div>
+                      <button
+                        type="button"
+                        onclick="clearPreselectedRoom()"
+                        class="btn btn-outline-gold btn-sm"
+                        style="flex-shrink: 0"
+                      >
+                        Change
+                      </button>
+                    </div>
+
+                    <!-- Dropdown (shown when no room pre-selected) -->
+                    <div id="roomSelectWrap">
+                      <div class="form-group">
+                        <label class="form-label" for="bookRoomSelect"
+                          >Select an Available Room *</label
+                        >
+                        <select id="bookRoomSelect" class="form-control">
+                          <option value="">-- Loading rooms... --</option>
+                        </select>
+                      </div>
+                      <div id="bookingRoomInfo" style="margin-top: 14px"></div>
+                    </div>
+
+                    <!-- Hidden room ID carrier -->
+                    <input type="hidden" id="bookRoomId" />
+
+                    <div
+                      style="
+                        margin-top: 24px;
+                        display: flex;
+                        justify-content: flex-end;
+                      "
+                    >
+                      <button
+                        type="button"
+                        class="btn btn-primary btn-lg"
+                        id="step1NextBtn"
+                      >
+                        Next: Add Dates →
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- ── STEP 2: Dates & details ── -->
+                <div class="booking-step-panel card" id="stepPanel2">
+                  <div class="card-header">
+                    <h3>📅 Booking Details</h3>
+                  </div>
+                  <div class="card-body">
+                    <form id="bookingForm" novalidate>
+                      <div class="form-row">
+                        <div class="form-group">
+                          <label class="form-label" for="bookCheckIn"
+                            >Check-In Date *</label
+                          >
+                          <input
+                            type="date"
+                            id="bookCheckIn"
+                            class="form-control"
+                            required
+                          />
+                          <span class="form-error" id="errCheckIn"></span>
+                        </div>
+                        <div class="form-group">
+                          <label class="form-label" for="bookCheckOut"
+                            >Check-Out Date *</label
+                          >
+                          <input
+                            type="date"
+                            id="bookCheckOut"
+                            class="form-control"
+                            required
+                          />
+                          <span class="form-error" id="errCheckOut"></span>
+                        </div>
+                      </div>
+
+                      <div class="form-group">
+                        <label class="form-label" for="bookGuests"
+                          >Number of Guests *</label
+                        >
+                        <select id="bookGuests" class="form-control" required>
+                          <option value="1">1 Guest</option>
+                          <option value="2" selected>2 Guests</option>
+                          <option value="3">3 Guests</option>
+                          <option value="4">4 Guests</option>
+                        </select>
+                      </div>
+
+                      <div class="form-group">
+                        <label class="form-label" for="bookSpecialReq"
+                          >Special Requests
+                          <span
+                            style="font-weight: 400; color: var(--text-light)"
+                            >(optional)</span
+                          >
+                        </label>
+                        <textarea
+                          id="bookSpecialReq"
+                          class="form-control"
+                          rows="3"
+                          placeholder="e.g. Early check-in, extra pillows, anniversary decoration..."
+                        ></textarea>
+                      </div>
+
+                      <div class="info-box info">
+                        🔒 Free cancellation up to 48 hours before check-in.
+                        Best rate guaranteed.
+                      </div>
+
+                      <div style="display: flex; gap: 12px; margin-top: 22px">
+                        <button
+                          type="button"
+                          class="btn btn-outline"
+                          id="step2BackBtn"
+                        >
+                          ← Back
+                        </button>
+                        <button
+                          type="submit"
+                          class="btn btn-primary btn-lg"
+                          style="flex: 1"
+                          id="confirmBookingBtn"
+                        >
+                          Confirm Booking 🎉
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+
+                <!-- ── STEP 3: Confirmation ── -->
+                <div class="booking-step-panel card" id="stepPanel3">
+                  <div
+                    class="card-body"
+                    style="text-align: center; padding: 52px 28px"
+                  >
+                    <div
+                      style="
+                        font-size: 5rem;
+                        margin-bottom: 16px;
+                        animation: bounce 1s ease;
+                      "
+                    >
+                      🎊
+                    </div>
+                    <h2
+                      style="color: var(--royal-blue-dark); margin-bottom: 10px"
+                    >
+                      Booking Confirmed!
+                    </h2>
+                    <p style="color: var(--text-mid); margin-bottom: 24px">
+                      Your reservation has been successfully created.<br />
+                      A confirmation email has been sent to your inbox.
+                    </p>
+
+                    <div
+                      style="
+                        background: var(--bg-light);
+                        border-radius: var(--radius-md);
+                        padding: 22px;
+                        margin-bottom: 28px;
+                        max-width: 380px;
+                        margin-left: auto;
+                        margin-right: auto;
+                      "
+                    >
+                      <div
+                        style="
+                          font-size: 1.5rem;
+                          font-weight: 800;
+                          color: var(--royal-blue);
+                        "
+                      >
+                        Booking <span id="confirmationBookingId">#—</span>
+                      </div>
+                      <div
+                        id="confirmationDetails"
+                        style="
+                          margin-top: 12px;
+                          font-size: 0.9rem;
+                          color: var(--text-mid);
+                          line-height: 1.8;
+                        "
+                      ></div>
+                    </div>
+
+                    <div
+                      style="
+                        display: flex;
+                        gap: 12px;
+                        justify-content: center;
+                        flex-wrap: wrap;
+                      "
+                    >
+                      <button
+                        class="btn btn-primary"
+                        onclick="
+                          switchBookingTab(
+                            'myBookings',
+                            document.querySelector('[data-tab=myBookings]'),
+                          )
+                        "
+                      >
+                        📋 View My Bookings
+                      </button>
+                      <a href="rooms.html" class="btn btn-outline"
+                        >Browse More Rooms</a
+                      >
+                      <button class="btn btn-gold" onclick="resetBookingForm()">
+                        + New Booking
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- /left column -->
+
+              <!-- Right: live summary -->
+              <div
+                class="booking-summary-sticky"
+                style="position: sticky; top: 88px"
+              >
+                <div class="booking-summary-card">
+                  <h4>📋 Booking Summary</h4>
+                  <div class="summary-row">
+                    <span class="label">Room</span>
+                    <span class="value" id="summaryRoomName">—</span>
+                  </div>
+                  <div class="summary-row">
+                    <span class="label">Type</span>
+                    <span class="value" id="summaryRoomType">—</span>
+                  </div>
+                  <div class="summary-row">
+                    <span class="label">Rate</span>
+                    <span class="value" id="summaryRoomPrice">—</span>
+                  </div>
+                  <div class="summary-row">
+                    <span class="label">Check-In</span>
+                    <span class="value" id="summaryCheckIn">—</span>
+                  </div>
+                  <div class="summary-row">
+                    <span class="label">Check-Out</span>
+                    <span class="value" id="summaryCheckOut">—</span>
+                  </div>
+                  <div class="summary-row">
+                    <span class="label">Nights</span>
+                    <span class="value" id="summaryNights">—</span>
+                  </div>
+                  <div class="summary-row">
+                    <span class="label">Guests</span>
+                    <span class="value" id="summaryGuests">—</span>
+                  </div>
+                  <div class="summary-row">
+                    <span class="label">Subtotal</span>
+                    <span class="value" id="summarySubtotal">—</span>
+                  </div>
+                  <div class="summary-row">
+                    <span class="label">Tax (12%)</span>
+                    <span class="value" id="summaryTax">—</span>
+                  </div>
+                  <div class="summary-row summary-total">
+                    <span class="label">Total</span>
+                    <span class="value" id="summaryTotal">—</span>
+                  </div>
+                </div>
+
+                <div class="info-box success" style="margin-top: 12px">
+                  ✅ Best rate guaranteed. No hidden fees.
+                </div>
+
+                <div class="card" style="margin-top: 14px; padding: 16px">
+                  <div
+                    style="
+                      font-size: 0.82rem;
+                      color: var(--text-light);
+                      line-height: 1.7;
+                    "
+                  >
+                    <div>📞 Need help? Call us:</div>
+                    <a
+                      href="tel:+18001235893"
+                      style="color: var(--royal-blue); font-weight: 700"
+                      >+1 (800) 123-LUXE</a
+                    >
+                  </div>
+                </div>
+              </div>
+              <!-- /right summary -->
+            </div>
+            <!-- /booking-layout -->
+          </div>
+          <!-- /#tab-newBooking -->
+
+          <!-- ================================================================ -->
+          <!--  TAB 2 — MY BOOKINGS                                             -->
+          <!-- ================================================================ -->
+          <div id="tab-myBookings" class="booking-tab-content hidden">
+            <div class="card">
+              <div class="card-header" style="flex-wrap: wrap; gap: 12px">
+                <h3>My Booking History</h3>
+                <div
+                  style="
+                    display: flex;
+                    gap: 10px;
+                    align-items: center;
+                    flex-wrap: wrap;
+                  "
+                >
+                  <select
+                    id="myBookingStatusFilter"
+                    class="form-control"
+                    style="width: auto; font-size: 0.85rem"
+                    onchange="loadMyBookings()"
+                  >
+                    <option value="">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="checked_in">Checked In</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                  <button
+                    class="btn btn-outline btn-sm"
+                    onclick="loadMyBookings()"
+                  >
+                    🔄 Refresh
+                  </button>
+                  <button
+                    class="btn btn-primary btn-sm"
+                    onclick="
+                      switchBookingTab(
+                        'newBooking',
+                        document.querySelector('[data-tab=newBooking]'),
+                      )
+                    "
+                  >
+                    ➕ New Booking
+                  </button>
+                </div>
+              </div>
+
+              <div class="card-body" style="padding: 0">
+                <div class="table-container">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>#ID</th>
+                        <th>Room</th>
+                        <th>Check-In</th>
+                        <th>Check-Out</th>
+                        <th>Nights</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="myBookingsTbody">
+                      <tr>
+                        <td colspan="8" class="table-empty">
+                          <div class="page-loader">
+                            <div class="spinner"></div>
+                            <span>Loading bookings...</span>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="card-footer">
+                <div class="pagination" id="myBookingsPagination"></div>
+              </div>
+            </div>
+          </div>
+          <!-- /#tab-myBookings -->
+
+          <!-- ================================================================ -->
+          <!--  TAB 3 — ALL BOOKINGS (Staff / Admin)                            -->
+          <!-- ================================================================ -->
+          <div
+            id="tab-allBookings"
+            class="booking-tab-content hidden"
+            data-role="admin,staff"
+          >
+            <div class="card">
+              <div class="card-header" style="flex-wrap: wrap; gap: 12px">
+                <h3>All Bookings</h3>
+                <div
+                  style="
+                    display: flex;
+                    gap: 10px;
+                    align-items: center;
+                    flex-wrap: wrap;
+                  "
+                >
+                  <select
+                    id="staffStatusFilter"
+                    class="form-control"
+                    style="width: auto; font-size: 0.85rem"
+                  >
+                    <option value="">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="checked_in">Checked In</option>
+                    <option value="checked_out">Checked Out</option>
+                    <option value="cancelled">Cancelled</option>
+                    <option value="completed">Completed</option>
+                  </select>
+                  <input
+                    type="text"
+                    id="staffBookingSearch"
+                    class="form-control"
+                    placeholder="Search guest or room..."
+                    style="width: 200px; font-size: 0.85rem"
+                  />
+                  <button
+                    class="btn btn-primary btn-sm"
+                    onclick="loadStaffBookings()"
+                  >
+                    🔍 Search
+                  </button>
+                  <button
+                    class="btn btn-outline btn-sm"
+                    onclick="loadStaffBookings()"
+                  >
+                    🔄 Refresh
+                  </button>
+                </div>
+              </div>
+
+              <div class="card-body" style="padding: 0">
+                <div class="table-container">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>#ID</th>
+                        <th>Guest</th>
+                        <th>Room</th>
+                        <th>Check-In</th>
+                        <th>Check-Out</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="staffBookingsTbody">
+                      <tr>
+                        <td colspan="8" class="table-empty">
+                          Select filters and click Search / Refresh
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="card-footer">
+                <div class="pagination" id="allBookingsPagination"></div>
+              </div>
+            </div>
+          </div>
+          <!-- /#tab-allBookings -->
+        </main>
+      </div>
+      <!-- /main-content -->
+    </div>
+    <!-- /app-layout -->
+
+    <!-- ===== BOOKING DETAIL MODAL ===== -->
+    <div class="modal-overlay" id="bookingDetailOverlay">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>Booking Details</h3>
+          <span
+            class="modal-close"
+            data-modal-close="bookingDetailOverlay"
+            role="button"
+            aria-label="Close"
+            >✕</span
+          >
+        </div>
+        <div class="modal-body" id="bookingDetailBody"></div>
+        <div class="modal-footer">
+          <button
+            class="btn btn-outline"
+            data-modal-close="bookingDetailOverlay"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+      /**
+       * switchBookingTab — switches visible tab panel and calls the
+       * appropriate load function.  Called by both tab buttons and
+       * confirmation-page action buttons.
+       */
+      function switchBookingTab(tabId, btn) {
+        // Update tab button states
+        document
+          .querySelectorAll("#bookingTabNav .tab-btn")
+          .forEach((b) => b.classList.remove("active"));
+        if (btn) btn.classList.add("active");
+
+        // Show / hide panels
+        document.querySelectorAll(".booking-tab-content").forEach((panel) => {
+          panel.classList.toggle("hidden", panel.id !== "tab-" + tabId);
+        });
+
+        // Trigger data load
+        if (tabId === "myBookings") loadMyBookings();
+        if (tabId === "allBookings") loadStaffBookings();
+      }
+
+      /** Reset the new-booking wizard back to step 1 */
+      function resetBookingForm() {
+        if (typeof bookingState !== "undefined") {
+          bookingState.step = 1;
+          bookingState.room = null;
+          bookingState.formData = {};
+        }
+        document.getElementById("bookingForm")?.reset();
+        document.getElementById("bookRoomId").value = "";
+        document.getElementById("bookRoomSelect").value = "";
+        document.getElementById("bookingRoomInfo").innerHTML = "";
+        document
+          .getElementById("preselectedRoomBanner")
+          ?.classList.add("hidden");
+        document.getElementById("roomSelectWrap")?.classList.remove("hidden");
+        // Reset summary
+        [
+          "summaryRoomName",
+          "summaryRoomType",
+          "summaryRoomPrice",
+          "summaryCheckIn",
+          "summaryCheckOut",
+          "summaryNights",
+          "summaryGuests",
+          "summarySubtotal",
+          "summaryTax",
+          "summaryTotal",
+        ].forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = "—";
+        });
+        // Go to step 1
+        if (typeof goToBookingStep === "function") goToBookingStep(1);
+        // Switch to new booking tab
+        switchBookingTab(
+          "newBooking",
+          document.querySelector("[data-tab=newBooking]"),
+        );
+      }
+
+      /** Called by the "Change" button on preselected room banner */
+      function clearPreselectedRoom() {
+        if (typeof bookingState !== "undefined") bookingState.room = null;
+        document.getElementById("bookRoomId").value = "";
+        document
+          .getElementById("preselectedRoomBanner")
+          ?.classList.add("hidden");
+        document.getElementById("roomSelectWrap")?.classList.remove("hidden");
+        document.getElementById("bookingRoomInfo").innerHTML = "";
+      }
+
+      // Expose for app.js inline references
+      window.switchBookingTab = switchBookingTab;
+      window.resetBookingForm = resetBookingForm;
+      window.clearPreselectedRoom = clearPreselectedRoom;
+    </script>
+  </body>
+</html>
