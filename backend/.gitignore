@@ -1,0 +1,20 @@
+# Environment variables - never commit secrets
+.env
+.env.*
+
+# Database files - sensitive
+database.sql
+import-db.js
+seed-database.js
+verify-db.js
+
+# Node modules - install via npm
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db

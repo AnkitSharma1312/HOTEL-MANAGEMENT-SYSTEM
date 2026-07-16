@@ -1,0 +1,27 @@
+{
+  "name": "hotel-management-backend",
+  "version": "1.0.0",
+  "description": "Backend for the hotel management system",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.6",
+    "dotenv": "^16.4.3",
+    "express": "^4.21.1",
+    "express-validator": "^7.1.0",
+    "helmet": "^7.0.1",
+    "jsonwebtoken": "^9.0.1",
+    "morgan": "^1.10.1",
+    "multer": "^2.2.0",
+    "mysql2": "^3.4.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}
