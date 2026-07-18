@@ -3,8 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard — Grand Luxe Hotel</title>
+    <title>Dashboard — The Taj Hotels</title>
     <link rel="stylesheet" href="style.css" />
+    <script>if(location.protocol==='file:'){location.replace('http://localhost:3000/dashboard.html');}</script>
   </head>
   <body data-page="dashboard">
     <div class="app-layout">
@@ -12,7 +13,7 @@
       <aside class="sidebar" id="sidebar" aria-label="Sidebar navigation">
         <div class="sidebar-header">
           <div class="sidebar-logo">🏨</div>
-          <span class="sidebar-brand">Grand<span>Luxe</span></span>
+          <span class="sidebar-brand">The <span>Taj</span></span>
           <span
             class="sidebar-close"
             id="sidebarClose"
@@ -317,7 +318,7 @@
                       <div class="activity-item">
                         <div class="activity-dot green"></div>
                         <div class="activity-text">
-                          <strong>Payment received — $1,240</strong
+                          <strong>Payment received — ₹1,240</strong
                           ><span>3 hours ago</span>
                         </div>
                         <span class="activity-time">07:58 AM</span>
@@ -369,127 +370,188 @@
               </div>
             </div>
 
-            <!-- Admin: Manage Sections -->
+            <!-- Staff Operations: Check-In/Out + Billing (visible to staff AND admin) -->
+            <div data-role="admin,staff" class="mt-3">
+
+              <!-- ── CHECK-IN / CHECK-OUT ── -->
+              <div class="card mb-3" id="checkins">
+                <div class="card-header" style="flex-wrap:wrap;gap:10px">
+                  <h3>✅ Check-In / Check-Out Management</h3>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+                    <select id="staffStatusFilter" class="form-control" style="width:auto;font-size:0.85rem">
+                      <option value="">All Status</option>
+                      <option value="confirmed">Confirmed</option>
+                      <option value="checked_in">Checked In</option>
+                      <option value="checked_out">Checked Out</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                    <button class="btn btn-primary btn-sm" onclick="loadStaffBookings()">🔄 Refresh</button>
+                  </div>
+                </div>
+                <div class="card-body" style="padding:0">
+                  <div class="table-container">
+                    <table class="data-table">
+                      <thead><tr>
+                        <th>#ID</th><th>Guest</th><th>Room</th>
+                        <th>Check-In</th><th>Check-Out</th>
+                        <th>Total</th><th>Status</th><th>Actions</th>
+                      </tr></thead>
+                      <tbody id="staffBookingsTbody">
+                        <tr><td colspan="8" class="table-empty">Loading...</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ── BILLING ── -->
+              <div class="card mb-3" id="billing">
+                <div class="card-header" style="flex-wrap:wrap;gap:10px">
+                  <h3>💳 Billing & Payment History</h3>
+                  <button class="btn btn-primary btn-sm" onclick="loadBillingTable()">🔄 Refresh</button>
+                </div>
+                <div class="card-body" style="padding:0">
+                  <div class="table-container">
+                    <table class="data-table">
+                      <thead><tr>
+                        <th>#Pay ID</th><th>Booking #</th><th>Guest</th>
+                        <th>Amount</th><th>Method</th><th>Status</th><th>Date</th>
+                      </tr></thead>
+                      <tbody id="billingTbody">
+                        <tr><td colspan="7" class="table-empty">Click Refresh to load</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Admin-only: Manage Sections -->
             <div data-role="admin" class="mt-3">
-              <div class="dashboard-grid-3">
-                <!-- Manage Guests -->
+                <!-- ── MANAGE GUESTS ── -->
                 <div class="card" id="guests">
-                  <div class="card-header">
-                    <h3>Guests</h3>
-                    <button
-                      class="btn btn-primary btn-sm"
-                      onclick="loadUsersTable('guest')"
-                    >
-                      Load
-                    </button>
+                  <div class="card-header" style="flex-wrap:wrap;gap:8px">
+                    <h3>👥 Manage Guests</h3>
+                    <div style="display:flex;gap:6px">
+                      <button class="btn btn-primary btn-sm" onclick="loadUsersTable('guest')">Load</button>
+                      <button class="btn btn-outline btn-sm" onclick="openAddGuestModal()">+ Add</button>
+                    </div>
                   </div>
-                  <div class="card-body" style="padding: 0">
+                  <div class="card-body" style="padding:0">
                     <div class="table-container">
                       <table class="data-table">
-                        <thead>
-                          <tr>
-                            <th>#</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Actions</th>
-                          </tr>
-                        </thead>
+                        <thead><tr>
+                          <th>#</th><th>Name</th><th>Email</th><th>Phone</th><th>Actions</th>
+                        </tr></thead>
                         <tbody id="usersTbody">
-                          <tr>
-                            <td colspan="4" class="table-empty">
-                              Click "Load" to fetch guests
-                            </td>
-                          </tr>
+                          <tr><td colspan="5" class="table-empty">Click "Load" to fetch guests</td></tr>
                         </tbody>
                       </table>
                     </div>
                   </div>
                 </div>
 
-                <!-- Check-ins today -->
-                <div class="card" id="checkins">
-                  <div class="card-header">
-                    <h3>Today's Check-Ins</h3>
-                    <button
-                      class="btn btn-primary btn-sm"
-                      onclick="loadStaffBookings()"
-                    >
-                      Refresh
-                    </button>
+                <!-- ── MANAGE STAFF ── -->
+                <div class="card" id="staff">
+                  <div class="card-header" style="flex-wrap:wrap;gap:8px">
+                    <h3>🧑‍💼 Manage Staff</h3>
+                    <div style="display:flex;gap:6px">
+                      <button class="btn btn-primary btn-sm" onclick="loadStaffTable()">Load</button>
+                      <button class="btn btn-outline btn-sm" onclick="openAddStaffModal()">+ Add</button>
+                    </div>
                   </div>
-                  <div class="card-body" style="padding: 0">
+                  <div class="card-body" style="padding:0">
                     <div class="table-container">
                       <table class="data-table">
-                        <thead>
-                          <tr>
-                            <th>#</th>
-                            <th>Guest</th>
-                            <th>Room</th>
-                            <th>Check-In</th>
-                            <th>Check-Out</th>
-                            <th>Total</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody id="staffBookingsTbody">
-                          <tr>
-                            <td colspan="8" class="table-empty">
-                              Click "Refresh" to load
-                            </td>
-                          </tr>
+                        <thead><tr>
+                          <th>#</th><th>Name</th><th>Position</th><th>Salary/mo</th><th>Last Paid</th><th>Actions</th>
+                        </tr></thead>
+                        <tbody id="staffTbody">
+                          <tr><td colspan="6" class="table-empty">Click "Load" to fetch staff</td></tr>
                         </tbody>
                       </table>
                     </div>
                   </div>
                 </div>
 
-                <!-- Reports -->
+                <!-- ── REPORTS ── -->
                 <div class="card" id="reports">
-                  <div class="card-header"><h3>Quick Reports</h3></div>
-                  <div class="card-body">
-                    <div
-                      style="display: flex; flex-direction: column; gap: 12px"
-                    >
-                      <button
-                        class="btn btn-outline btn-block"
-                        onclick="
-                          Toast.info(
-                            'Reports',
-                            'Generating occupancy report...',
-                          )
-                        "
-                      >
-                        📊 Occupancy Report
-                      </button>
-                      <button
-                        class="btn btn-outline btn-block"
-                        onclick="
-                          Toast.info('Reports', 'Generating revenue report...')
-                        "
-                      >
-                        💰 Revenue Report
-                      </button>
-                      <button
-                        class="btn btn-outline btn-block"
-                        onclick="
-                          Toast.info('Reports', 'Generating guest report...')
-                        "
-                      >
-                        👥 Guest Report
-                      </button>
-                      <button
-                        class="btn btn-gold btn-block"
-                        onclick="
-                          Toast.info('Export', 'Exporting data as CSV...')
-                        "
-                      >
-                        ⬇️ Export Data
-                      </button>
+                  <div class="card-header"><h3>📊 Reports</h3></div>
+                  <div class="card-body" id="reportsBody">
+                    <!-- Stats summary -->
+                    <div id="reportsSummary" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+                      <div style="background:var(--bg-light);border-radius:var(--radius-md);padding:12px;text-align:center">
+                        <div style="font-size:1.4rem;font-weight:800;color:var(--royal-blue)" id="rptTotalRev">—</div>
+                        <div style="font-size:0.78rem;color:var(--text-light)">Total Revenue</div>
+                      </div>
+                      <div style="background:var(--bg-light);border-radius:var(--radius-md);padding:12px;text-align:center">
+                        <div style="font-size:1.4rem;font-weight:800;color:var(--success)" id="rptTotalBook">—</div>
+                        <div style="font-size:0.78rem;color:var(--text-light)">Total Bookings</div>
+                      </div>
+                      <div style="background:var(--bg-light);border-radius:var(--radius-md);padding:12px;text-align:center">
+                        <div style="font-size:1.4rem;font-weight:800;color:var(--gold-dark)" id="rptOccRate">—</div>
+                        <div style="font-size:0.78rem;color:var(--text-light)">Occupancy Rate</div>
+                      </div>
+                      <div style="background:var(--bg-light);border-radius:var(--radius-md);padding:12px;text-align:center">
+                        <div style="font-size:1.4rem;font-weight:800;color:var(--royal-blue-dark)" id="rptAvgStay">—</div>
+                        <div style="font-size:0.78rem;color:var(--text-light)">Avg Stay (nights)</div>
+                      </div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:8px">
+                      <button class="btn btn-outline btn-block" onclick="loadReportsSummary()">🔄 Refresh Stats</button>
+                      <button class="btn btn-outline btn-block" onclick="exportCSV()">⬇️ Export Bookings CSV</button>
                     </div>
                   </div>
                 </div>
               </div>
+
+              <!-- ── SETTINGS ── -->
+              <div class="card mt-3" id="settings">
+                <div class="card-header"><h3>⚙️ Hotel Settings</h3></div>
+                <div class="card-body">
+                  <form id="settingsForm" novalidate style="max-width:640px">
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label class="form-label">Hotel Name</label>
+                        <input type="text" id="settingName" class="form-control" value="The Taj Hotels">
+                      </div>
+                      <div class="form-group">
+                        <label class="form-label">Contact Phone</label>
+                        <input type="tel" id="settingPhone" class="form-control" value="+91 22 6665 3366">
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Address</label>
+                      <input type="text" id="settingAddress" class="form-control" value="Apollo Bunder, Colaba, Mumbai - 400001">
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Email</label>
+                      <input type="email" id="settingEmail" class="form-control" value="reservations@tajhotels.com">
+                    </div>
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label class="form-label">Check-In Time</label>
+                        <input type="time" id="settingCheckIn" class="form-control" value="14:00">
+                      </div>
+                      <div class="form-group">
+                        <label class="form-label">Check-Out Time</label>
+                        <input type="time" id="settingCheckOut" class="form-control" value="12:00">
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Tax Rate (%)</label>
+                      <input type="number" id="settingTax" class="form-control" value="12" min="0" max="30" style="max-width:120px">
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">UPI Payment ID</label>
+                      <input type="text" id="settingUpi" class="form-control" value="tajhotels@upi" style="max-width:240px">
+                    </div>
+                    <button type="submit" class="btn btn-primary">💾 Save Settings</button>
+                  </form>
+                </div>
+              </div>
+
             </div>
           </div>
 

@@ -50,7 +50,7 @@ const Auth = (() => {
 })();
 
 /*  TOAST NOTIFICATION SYSTEM */
-const Toast = () => {
+const Toast = (() => {
   let container = null;
 
   function getContainer() {
@@ -61,53 +61,44 @@ const Toast = () => {
     }
     return container;
   }
-};
-/**
- * Show a toast notification.
- * @param {'success'|'error'|'warning'|'info'} type
- * @param {string} title
- * @param {string} message
- * @param {number} duration  ms before auto-dismiss (default 4000)
- */
-function show(type, title, message = "", duration = 4000) {
-  const icons = { success: "✅", error: "❌", warning: "⚠️", info: "ℹ️" };
-  const el = document.createElement("div");
-  el.className = `toast toast-${type}`;
-  el.innerHTML = `
-      <div class="toast-icon">${icons[type] || "ℹ️"}</div>
-      <div class="toast-content">
-        <div class="toast-title">${title}</div>
-        ${message ? `<div class="toast-message">${message}</div>` : ""}
-      </div>
-      <span class="toast-close" role="button" aria-label="Close">✕</span>
-      <div class="toast-progress" style="animation-duration:${duration}ms"></div>
-    `;
 
-  el.querySelector(".toast-close").addEventListener("click", () => dismiss(el));
-  getContainer().appendChild(el);
-  if (duration > 0) setTimeout(() => dismiss(el), duration);
-  return el;
-}
+  function dismiss(el) {
+    if (!el || !el.parentNode) return;
+    el.classList.add("removing");
+    setTimeout(() => el.remove(), 320);
+  }
 
-function dismiss(el) {
-  if (!el || !el.parentNode) return;
-  el.classList.add("removing");
-  setTimeout(() => el.remove(), 320);
-}
+  function show(type, title, message = "", duration = 4000) {
+    const icons = { success: "✅", error: "❌", warning: "⚠️", info: "ℹ️" };
+    const el = document.createElement("div");
+    el.className = `toast toast-${type}`;
+    el.innerHTML = `
+        <div class="toast-icon">${icons[type] || "ℹ️"}</div>
+        <div class="toast-content">
+          <div class="toast-title">${title}</div>
+          ${message ? `<div class="toast-message">${message}</div>` : ""}
+        </div>
+        <span class="toast-close" role="button" aria-label="Close">✕</span>
+        <div class="toast-progress" style="animation-duration:${duration}ms"></div>
+      `;
 
-return {
-  success: (title, msg, dur) => show("success", title, msg, dur),
-  error: (title, msg, dur) => show("error", title, msg, dur),
-  warning: (title, msg, dur) => show("warning", title, msg, dur),
-  info: (title, msg, dur) => show("info", title, msg, dur),
-};
+    el.querySelector(".toast-close").addEventListener("click", () => dismiss(el));
+    getContainer().appendChild(el);
+    if (duration > 0) setTimeout(() => dismiss(el), duration);
+    return el;
+  }
+
+  return {
+    success: (title, msg, dur) => show("success", title, msg, dur),
+    error: (title, msg, dur) => show("error", title, msg, dur),
+    warning: (title, msg, dur) => show("warning", title, msg, dur),
+    info: (title, msg, dur) => show("info", title, msg, dur),
+  };
+})();
 
 /*   MODAL MANAGER  */
 const Modal = (() => {
-  /**
-   * Open a modal overlay by ID.
-   * Adds 'open' class; ESC key and backdrop click close it.
-   */
+  
   function open(overlayId) {
     const overlay = document.getElementById(overlayId);
     if (!overlay) return;
@@ -140,10 +131,7 @@ const Modal = (() => {
       document.removeEventListener("keydown", overlay._escHandler);
   }
 
-  /**
-   * Show a simple confirmation dialog.
-   * Returns a Promise<boolean>.
-   */
+  
   function confirm({
     title = "Are you sure?",
     message = "",
@@ -303,11 +291,12 @@ const UI = (() => {
         .replace(/"/g, "&quot;");
     },
 
-    /** Format currency */
+    /** Format currency — Indian Rupees */
     currency(amount) {
-      return new Intl.NumberFormat("en-US", {
+      return new Intl.NumberFormat("en-IN", {
         style: "currency",
-        currency: "USD",
+        currency: "INR",
+        maximumFractionDigits: 2,
       }).format(amount || 0);
     },
 
@@ -497,10 +486,18 @@ function initTopbar() {
 
 /* Show/hide role-specific nav sections */
 function applyRoleVisibility() {
-  const role = Auth.getRole();
+  const role     = Auth.getRole();
+  const user     = Auth.getUser();
+  const dept     = (user?.department || "").toLowerCase();
+  const position = (user?.position   || "").toLowerCase();
+  const isManager = role === "admin" || position.includes("manager") || dept.includes("management");
+
   document.querySelectorAll("[data-role]").forEach((el) => {
     const allowed = el.dataset.role.split(",").map((r) => r.trim());
-    el.style.display = allowed.includes(role) ? "" : "none";
+    let visible = allowed.includes(role);
+    // Manager staff gets admin-level visibility
+    if (!visible && isManager && allowed.includes("admin")) visible = true;
+    el.style.display = visible ? "" : "none";
   });
 }
 
@@ -534,7 +531,6 @@ function initLandingPage() {
 
   /* --- Update nav CTA based on auth state --- */
   // If user is logged in, replace login/register buttons with Dashboard link
-  const navActions = document.getElementById("navActions");
   if (navActions && Auth.isLoggedIn()) {
     navActions.innerHTML = `
       <a href="dashboard.html" class="btn btn-gold btn-sm">Dashboard</a>
@@ -601,13 +597,33 @@ async function loadFeaturedRooms() {
   }
 }
 
+// Room type → Unsplash image mapping
+function getRoomImage(room) {
+  if (room.image) return room.image;
+  const type = (room.type || "").toLowerCase();
+  const images = {
+    "standard"          : "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600&q=80",
+    "deluxe"            : "https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=600&q=80",
+    "suite"             : "https://images.unsplash.com/photo-1590490360182-c33d57733427?w=600&q=80",
+    "executive"         : "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=600&q=80",
+    "presidential suite": "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&q=80",
+    "villa"             : "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600&q=80",
+  };
+  for (const [key, url] of Object.entries(images)) {
+    if (type.includes(key.split(" ")[0])) return url;
+  }
+  return "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600&q=80";
+}
+
 function renderRoomCard(room) {
+  const imgSrc = getRoomImage(room);
   return `
     <div class="room-card">
       <div class="room-card-img">
-        ${room.image ? `<img src="${UI.escape(room.image)}" alt="${UI.escape(room.name)}">` : `<div class="room-card-img-placeholder">🛏️</div>`}
+        <img src="${imgSrc}" alt="${UI.escape(room.name || room.type || "Room")}" loading="lazy"
+          style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='<div class=&quot;room-card-img-placeholder&quot;>🛏️</div>'">
         <span class="room-badge">${UI.escape(room.type || "Standard")}</span>
-        <div class="room-price-tag"><span>$${room.price || room.pricePerNight || 0}</span>/night</div>
+        <div class="room-price-tag"><span>₹${Number(room.price || room.pricePerNight || 0).toLocaleString("en-IN")}</span>/night</div>
       </div>
       <div class="room-card-body">
         <h3>${UI.escape(room.name || room.roomNumber || "Room")}</h3>
@@ -667,7 +683,33 @@ function renderSampleRooms() {
 
 /*   LOGIN.HTML */
 function initLoginPage() {
-  if (!Auth.requireGuest()) return;
+  // Clear any stale/invalid token before checking auth state
+  // This prevents staff from being stuck in redirect loops
+  const token = Auth.getToken();
+  if (token) {
+    // Verify token is still valid by checking its structure
+    // If malformed or clearly expired, clear it
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        Auth.logout();
+        return;
+      }
+      const payload = JSON.parse(atob(parts[1]));
+      if (payload.exp && payload.exp * 1000 < Date.now()) {
+        // Token expired — clear and let them login fresh
+        localStorage.removeItem('hms_token');
+        localStorage.removeItem('hms_user');
+      } else {
+        // Valid token — redirect to dashboard
+        window.location.href = "dashboard.html";
+        return;
+      }
+    } catch {
+      localStorage.removeItem('hms_token');
+      localStorage.removeItem('hms_user');
+    }
+  }
 
   // Toggle password visibility
   document
@@ -684,11 +726,7 @@ function initLoginPage() {
     ?.addEventListener("submit", async (e) => {
       e.preventDefault();
       const valid = Validator.validate([
-        {
-          id: "loginEmail",
-          label: "Email",
-          rules: { required: true, email: true },
-        },
+        { id: "loginEmail",    label: "Email",    rules: { required: true, email: true } },
         { id: "loginPassword", label: "Password", rules: { required: true } },
       ]);
       if (!valid) return;
@@ -698,15 +736,18 @@ function initLoginPage() {
 
       try {
         const res = await AuthAPI.login(
-          document.getElementById("loginEmail").value,
+          document.getElementById("loginEmail").value.trim(),
           document.getElementById("loginPassword").value,
         );
+        // Ensure we have both token and user
+        if (!res.token || !res.user) {
+          throw new Error("Invalid response from server. Please try again.");
+        }
         Auth.save(res.token, res.user);
-        Toast.success(
-          "Welcome back!",
-          `Good to see you, ${res.user.name || "there"}.`,
-        );
-        setTimeout(() => Auth.redirectToDashboard(), 600);
+        Toast.success("Welcome back!", `Good to see you, ${res.user.name || "there"}.`);
+        setTimeout(() => {
+          window.location.href = "dashboard.html";
+        }, 600);
       } catch (err) {
         Toast.error("Login failed", err.message);
         UI.btnReset(btn);
@@ -793,31 +834,211 @@ async function initDashboardPage() {
   const role = Auth.getRole();
   const user = Auth.getUser();
 
-  // Set welcome message
-  const welcomeEl = document.getElementById("dashWelcome");
-  if (welcomeEl)
-    welcomeEl.textContent = `Welcome back, ${user?.name?.split(" ")[0] || "there"}!`;
+  // Determine effective department for staff
+  const dept       = (user?.department || "").toLowerCase();
+  const position   = (user?.position   || "").toLowerCase();
+  const isManager  = role === "admin" || position.includes("manager") || dept.includes("management");
+  const isFrontDesk = dept.includes("front") || position.includes("reception") || position.includes("concierge");
+  const isHousekeeping = dept.includes("housekeeping");
+  const isMaintenance  = dept.includes("maintenance");
 
-  // Load stats
+  // Set welcome message with position info
+  const welcomeEl = document.getElementById("dashWelcome");
+  if (welcomeEl) {
+    const greeting = user?.name?.split(" ")[0] || "there";
+    const posLabel = user?.position && user.position !== "Staff" ? ` — ${user.position}` : "";
+    welcomeEl.textContent = `Welcome back, ${greeting}${posLabel}!`;
+  }
+
+  // Update topbar subtitle to show department
+  if (role === "staff" && user?.department) {
+    const titleEl = document.querySelector(".topbar-title h2");
+    if (titleEl) titleEl.textContent = user.department + " Dashboard";
+  }
+
   try {
     if (role === "admin" || role === "staff") {
-      const stats = await ReportsAPI.dashboard();
+      const res   = await ReportsAPI.dashboard();
+      const stats = res.data || res;
       populateDashboardStats(stats);
-      loadRecentBookings();
-      if (role === "admin") loadChartData(stats);
+
+      // Badge for pending check-ins
+      const badgeEl = document.getElementById("pendingCheckIns");
+      if (badgeEl) {
+        const count = Number(stats.pendingBookings || 0) + Number(stats.checkInsToday || 0);
+        badgeEl.textContent = count;
+        badgeEl.style.display = count > 0 ? "" : "none";
+      }
+
+      if (isManager) {
+        // MANAGER / ADMIN — full dashboard
+        loadRecentBookings();
+        loadChartData(stats);
+        loadStaffBookings();
+        loadUsersTable("guest");
+        loadStaffTable();
+        loadReportsSummary();
+        initSettingsForm();
+      } else if (isFrontDesk) {
+        // FRONT DESK / RECEPTION — bookings + check-in/out
+        loadRecentBookings();
+        loadStaffBookings();
+        renderStaffInterface("frontdesk");
+      } else if (isHousekeeping) {
+        // HOUSEKEEPING — room status view
+        loadRecentBookings();
+        renderStaffInterface("housekeeping");
+      } else if (isMaintenance) {
+        // MAINTENANCE — room status only
+        loadRecentBookings();
+        renderStaffInterface("maintenance");
+      } else {
+        // DEFAULT STAFF — bookings + check-in/out
+        loadRecentBookings();
+        loadStaffBookings();
+      }
+
     } else {
       loadGuestDashboard();
     }
   } catch {
-    // Backend not available — render placeholders and chart with sample data
     populateDashboardStats({});
     if (role === "admin" || role === "staff") {
       loadRecentBookings();
-      if (role === "admin") loadChartData({});
+      if (isManager) { loadChartData({}); loadStaffBookings(); initSettingsForm(); }
+      else loadStaffBookings();
     } else {
       loadGuestDashboard();
     }
   }
+
+  // Sidebar hash links smooth scroll
+  document.querySelectorAll('.nav-item[href*="#"]').forEach(link => {
+    link.addEventListener("click", (e) => {
+      const hash = link.getAttribute("href").split("#")[1];
+      if (!hash) return;
+      const target = document.getElementById(hash);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+        document.getElementById("sidebar")?.classList.remove("open");
+        document.getElementById("sidebarOverlay")?.classList.remove("show");
+      }
+    });
+  });
+}
+
+/* ── Render department-specific staff widget ── */
+function renderStaffInterface(type) {
+  // Find or create the staff widget container
+  let container = document.getElementById("staffInterfaceWidget");
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "staffInterfaceWidget";
+    container.className = "mt-3";
+    // Insert after the recent bookings area
+    const mainGrid = document.querySelector('[data-role="admin,staff"] .dashboard-grid');
+    if (mainGrid) mainGrid.parentNode.insertBefore(container, mainGrid.nextSibling);
+    else document.querySelector(".page-content")?.appendChild(container);
+  }
+
+  if (type === "housekeeping") {
+    container.innerHTML = `
+      <div class="card">
+        <div class="card-header">
+          <h3>🧹 Housekeeping — Room Status</h3>
+          <button class="btn btn-primary btn-sm" onclick="loadHousekeepingRooms()">🔄 Refresh</button>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div class="table-container">
+            <table class="data-table">
+              <thead><tr><th>Room</th><th>Type</th><th>Floor</th><th>Status</th><th>Action</th></tr></thead>
+              <tbody id="housekeepingTbody"><tr><td colspan="5" class="table-empty">Loading...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>`;
+    loadHousekeepingRooms();
+  } else if (type === "maintenance") {
+    container.innerHTML = `
+      <div class="card">
+        <div class="card-header">
+          <h3>🔧 Maintenance — Rooms Needing Attention</h3>
+          <button class="btn btn-primary btn-sm" onclick="loadMaintenanceRooms()">🔄 Refresh</button>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div class="table-container">
+            <table class="data-table">
+              <thead><tr><th>Room</th><th>Type</th><th>Floor</th><th>Status</th><th>Update</th></tr></thead>
+              <tbody id="maintenanceTbody"><tr><td colspan="5" class="table-empty">Loading...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>`;
+    loadMaintenanceRooms();
+  }
+}
+
+async function loadHousekeepingRooms() {
+  const tbody = document.getElementById("housekeepingTbody");
+  if (!tbody) return;
+  try {
+    const data  = await RoomsAPI.list({ limit: 100 });
+    const rooms = data.rooms || data.data || [];
+    tbody.innerHTML = rooms.map(r => `
+      <tr>
+        <td><strong>${UI.escape(r.roomNumber)}</strong></td>
+        <td>${UI.escape(r.type || "—")}</td>
+        <td>Floor ${r.floor || "—"}</td>
+        <td>${UI.statusBadge(r.status)}</td>
+        <td>
+          ${r.status === "occupied" ? `<button class="btn btn-warning btn-sm" onclick="markRoomMaintenance(${r.id})">🔧 Needs Clean</button>` : ""}
+          ${r.status === "maintenance" ? `<button class="btn btn-success btn-sm" onclick="markRoomAvailable(${r.id})">✅ Ready</button>` : ""}
+        </td>
+      </tr>`).join("");
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="5" class="table-empty">${UI.escape(err.message)}</td></tr>`;
+  }
+}
+
+async function loadMaintenanceRooms() {
+  const tbody = document.getElementById("maintenanceTbody");
+  if (!tbody) return;
+  try {
+    const data  = await RoomsAPI.list({ status: "maintenance", limit: 100 });
+    const rooms = data.rooms || data.data || [];
+    if (!rooms.length) {
+      tbody.innerHTML = '<tr><td colspan="5" class="table-empty">No rooms need maintenance ✅</td></tr>';
+      return;
+    }
+    tbody.innerHTML = rooms.map(r => `
+      <tr>
+        <td><strong>${UI.escape(r.roomNumber)}</strong></td>
+        <td>${UI.escape(r.type || "—")}</td>
+        <td>Floor ${r.floor || "—"}</td>
+        <td>${UI.statusBadge(r.status)}</td>
+        <td><button class="btn btn-success btn-sm" onclick="markRoomAvailable(${r.id})">✅ Fixed — Mark Available</button></td>
+      </tr>`).join("");
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="5" class="table-empty">${UI.escape(err.message)}</td></tr>`;
+  }
+}
+
+async function markRoomMaintenance(roomId) {
+  try {
+    await RoomsAPI.updateStatus(roomId, "maintenance");
+    Toast.success("Updated", "Room marked for maintenance.");
+    loadHousekeepingRooms();
+  } catch (err) { Toast.error("Error", err.message); }
+}
+
+async function markRoomAvailable(roomId) {
+  try {
+    await RoomsAPI.updateStatus(roomId, "available");
+    Toast.success("Updated", "Room marked as available.");
+    if (document.getElementById("housekeepingTbody")) loadHousekeepingRooms();
+    if (document.getElementById("maintenanceTbody"))  loadMaintenanceRooms();
+  } catch (err) { Toast.error("Error", err.message); }
 }
 
 function populateDashboardStats(stats) {
@@ -1008,12 +1229,14 @@ async function loadRooms() {
 }
 
 function renderRoomCardWithActions(room, isAdmin) {
+  const imgSrc = getRoomImage(room);
   return `
     <div class="room-card" data-room-id="${room.id || room._id}">
       <div class="room-card-img">
-        ${room.image ? `<img src="${UI.escape(room.image)}" alt="${UI.escape(room.name)}">` : `<div class="room-card-img-placeholder">🛏️</div>`}
+        <img src="${imgSrc}" alt="${UI.escape(room.name || room.type || "Room")}" loading="lazy"
+          style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='<div class=&quot;room-card-img-placeholder&quot;>🛏️</div>'">
         <span class="room-badge">${UI.escape(room.type || "Standard")}</span>
-        <div class="room-price-tag"><span>$${room.price || room.pricePerNight || 0}</span>/night</div>
+        <div class="room-price-tag"><span>₹${Number(room.price || room.pricePerNight || 0).toLocaleString("en-IN")}</span>/night</div>
       </div>
       <div class="room-card-body">
         <h3>${UI.escape(room.name || `Room ${room.roomNumber}`)}</h3>
@@ -1192,6 +1415,15 @@ async function initBookingPage() {
     .getElementById("bookingForm")
     ?.addEventListener("submit", handleBookingSubmit);
 
+  // Show guest selector for admin/staff and initialize payment highlight
+  const role = Auth.getRole();
+  if (role === "admin" || role === "staff") {
+    const wrap = document.getElementById("guestSelectorWrap");
+    if (wrap) wrap.style.display = "";
+    loadGuestOptions();
+  }
+  highlightPayment();
+
   if (roomId) {
     await preSelectRoom(roomId);
   } else {
@@ -1214,7 +1446,7 @@ async function preSelectRoom(roomId) {
       <div style="font-weight:700;font-size:1.05rem">${UI.escape(room.name || "Room " + room.roomNumber)}</div>
       <div style="font-size:0.85rem;opacity:0.8;margin-top:3px">
         ${UI.escape(room.type || "Standard")} &middot; Max ${room.capacity || 2} guests
-        &nbsp;&middot;&nbsp; <strong style="color:var(--gold-light)">$${room.price || room.pricePerNight || 0}/night</strong>
+        &nbsp;&middot;&nbsp; <strong style="color:var(--gold-light)">₹${Number(room.price || room.pricePerNight || 0).toLocaleString("en-IN")}/night</strong>
       </div>`;
     if (banner) banner.classList.remove("hidden");
     if (selectWrap) selectWrap.classList.add("hidden");
@@ -1282,7 +1514,7 @@ async function loadAvailableRooms() {
               <div style="font-weight:700;color:var(--royal-blue-dark)">${UI.escape(room.name || "Room " + room.roomNumber)}</div>
               <div style="font-size:0.85rem;color:var(--text-mid);margin-top:3px">
                 ${UI.escape(room.type || "Standard")} &middot; Max ${room.capacity || 2} guests
-                &middot; <span style="color:var(--royal-blue);font-weight:700">$${room.price || room.pricePerNight || 0}/night</span>
+                &middot; <span style="color:var(--royal-blue);font-weight:700">₹${Number(room.price || room.pricePerNight || 0).toLocaleString("en-IN")}/night</span>
               </div>
               ${room.description ? '<div style="font-size:0.82rem;color:var(--text-light);margin-top:4px">' + UI.escape(room.description.slice(0, 100)) + "</div>" : ""}
             </div>
@@ -1330,13 +1562,10 @@ function goToBookingStep(step) {
 }
 
 function updateBookingSummary() {
-  const checkIn = document.getElementById("bookCheckIn")?.value;
+  const checkIn  = document.getElementById("bookCheckIn")?.value;
   const checkOut = document.getElementById("bookCheckOut")?.value;
-  const guests = document.getElementById("bookGuests")?.value || 1;
-  const set = (id, val) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = val;
-  };
+  const guests   = document.getElementById("bookGuests")?.value || 1;
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
 
   if (checkIn && checkOut && checkOut <= checkIn) {
     document.getElementById("bookCheckOut").value = "";
@@ -1345,93 +1574,282 @@ function updateBookingSummary() {
   }
 
   set("summaryGuests", guests + " guest" + (guests > 1 ? "s" : ""));
-  if (checkIn) set("summaryCheckIn", UI.formatDate(checkIn));
+  if (checkIn)  set("summaryCheckIn",  UI.formatDate(checkIn));
   if (checkOut) set("summaryCheckOut", UI.formatDate(checkOut));
 
   if (checkIn && checkOut) {
-    const price =
-      bookingState.room?.price || bookingState.room?.pricePerNight || 0;
-    const nights = UI.nightsBetween(checkIn, checkOut);
+    const price    = bookingState.room?.price || bookingState.room?.pricePerNight || 0;
+    const nights   = UI.nightsBetween(checkIn, checkOut);
     const subtotal = nights * price;
-    const tax = subtotal * 0.12;
-    const total = subtotal + tax;
-    set("summaryNights", nights + " night" + (nights > 1 ? "s" : ""));
+    const services = getSelectedServicesTotal();
+    const tax      = (subtotal + services) * 0.12;
+    const total    = subtotal + services + tax;
+
+    set("summaryNights",   nights + " night" + (nights > 1 ? "s" : ""));
     set("summarySubtotal", UI.currency(subtotal));
-    set("summaryTax", UI.currency(tax));
-    set("summaryTotal", UI.currency(total));
-    bookingState.formData = { checkIn, checkOut, nights, subtotal, tax, total };
+    set("summaryServices", services > 0 ? UI.currency(services) : "₹0.00");
+    set("summaryTax",      UI.currency(tax));
+    set("summaryTotal",    UI.currency(total));
+    bookingState.formData = { checkIn, checkOut, nights, subtotal, services, tax, total };
+  }
+}
+
+// Get total of selected additional services
+function getSelectedServicesTotal() {
+  let total = 0;
+  document.querySelectorAll(".service-cb:checked").forEach(cb => {
+    total += parseFloat(cb.dataset.price) || 0;
+  });
+  return total;
+}
+
+// Get list of selected service names
+function getSelectedServices() {
+  const services = [];
+  document.querySelectorAll(".service-cb:checked").forEach(cb => {
+    services.push({ name: cb.dataset.name, price: parseFloat(cb.dataset.price) });
+  });
+  return services;
+}
+
+// Called when a service checkbox changes
+function updateServiceTotal() {
+  updateBookingSummary();
+}
+
+// Highlight selected payment method card and show relevant section
+function highlightPayment() {
+  const selected = document.querySelector('input[name="paymentMethod"]:checked')?.value;
+
+  // Highlight border on all payment option labels
+  document.querySelectorAll(".payment-method-option").forEach(label => {
+    const radio = label.querySelector("input[type=radio]");
+    label.style.borderColor   = radio?.checked ? "var(--royal-blue)" : "#dde2f0";
+    label.style.background    = radio?.checked ? "rgba(26,35,126,0.06)" : "";
+    label.style.fontWeight    = radio?.checked ? "600" : "400";
+  });
+
+  // Show/hide payment detail sections
+  const upiSection        = document.getElementById("upiQrSection");
+  const cardSection       = document.getElementById("cardSection");
+  const netBankSection    = document.getElementById("netBankingSection");
+
+  if (upiSection)     upiSection.style.display     = selected === "upi"          ? "" : "none";
+  if (cardSection)    cardSection.style.display     = selected === "card"         ? "" : "none";
+  if (netBankSection) netBankSection.style.display  = selected === "net_banking"  ? "" : "none";
+
+  // Generate UPI QR when UPI is selected
+  if (selected === "upi") {
+    generateUpiQr();
+  }
+}
+
+let _qrInstance = null;
+function generateUpiQr() {
+  const total    = bookingState.formData?.total || 0;
+  const amount   = Math.round(total * 100) / 100;
+  const upiId    = "grandluxe@upi";
+  const name     = "Grand Luxe Hotel";
+  const note     = "Room Booking";
+  const upiUrl   = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(name)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
+
+  // Update amount display
+  const amtEl = document.getElementById("upiAmountDisplay");
+  if (amtEl) amtEl.textContent = `Amount: ₹${amount.toLocaleString("en-IN")}`;
+
+  // Generate QR using qrcode.js library
+  const container = document.getElementById("upiQrCode");
+  if (!container) return;
+  container.innerHTML = ""; // clear previous
+
+  try {
+    if (typeof QRCode !== "undefined") {
+      new QRCode(container, {
+        text    : upiUrl,
+        width   : 180,
+        height  : 180,
+        colorDark  : "#1a237e",
+        colorLight : "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H,
+      });
+    } else {
+      // Fallback: show UPI URL as text if library not loaded
+      container.innerHTML = `<div style="padding:20px;font-size:0.75rem;word-break:break-all;background:#fff;border-radius:8px;max-width:200px">${upiUrl}</div>`;
+    }
+  } catch(e) {
+    container.innerHTML = `<div style="padding:12px;color:var(--text-mid);font-size:0.85rem">UPI ID: <strong>${upiId}</strong></div>`;
+  }
+}
+
+// Format card number with spaces
+function formatCardNumber(input) {
+  let val = input.value.replace(/\D/g, "").substring(0, 16);
+  input.value = val.replace(/(.{4})/g, "$1 ").trim();
+}
+
+// Load guests list for admin/staff selector
+async function loadGuestOptions() {
+  const select = document.getElementById("bookGuestSelect");
+  if (!select) return;
+  select.innerHTML = '<option value="">— Loading guests... —</option>';
+  try {
+    const data = await UsersAPI.list({ role: "guest" });
+    const guests = data.users || data.data || [];
+
+    select.innerHTML =
+      '<option value="">— Select Existing Guest —</option>' +
+      '<option value="NEW_GUEST">➕ Add New Guest Manually</option>' +
+      (guests.length ? '<option disabled>──────────────────</option>' : '') +
+      guests.map(g =>
+        `<option value="${g.id}">${UI.escape(g.name)} | ${UI.escape(g.email)} | ${UI.escape(g.phone || 'N/A')}</option>`
+      ).join("");
+
+    select.addEventListener("change", () => {
+      const val    = select.value;
+      const infoEl = document.getElementById("selectedGuestInfo");
+      const newGuestForm = document.getElementById("newGuestFormWrap");
+
+      if (val === "NEW_GUEST") {
+        // Show manual entry form
+        document.getElementById("bookGuestId").value = "";
+        if (newGuestForm) newGuestForm.style.display = "";
+        if (infoEl) infoEl.innerHTML = "";
+      } else if (val) {
+        // Existing guest selected
+        if (newGuestForm) newGuestForm.style.display = "none";
+        document.getElementById("bookGuestId").value = val;
+        const opt = select.options[select.selectedIndex];
+        if (infoEl) infoEl.innerHTML = `<div class="info-box success" style="padding:8px 12px;margin-top:6px">✅ Booking for: <strong>${UI.escape(opt.text)}</strong></div>`;
+      } else {
+        if (newGuestForm) newGuestForm.style.display = "none";
+        document.getElementById("bookGuestId").value = "";
+        if (infoEl) infoEl.innerHTML = "";
+      }
+    });
+  } catch (err) {
+    select.innerHTML = '<option value="">Error loading guests — check connection</option>';
+  }
+}
+
+// Register new guest inline and return their ID
+async function registerNewGuestInline() {
+  const name  = document.getElementById("newGuestName")?.value?.trim();
+  const email = document.getElementById("newGuestEmail")?.value?.trim();
+  const phone = document.getElementById("newGuestPhone")?.value?.trim();
+  const pass  = document.getElementById("newGuestPass")?.value?.trim();
+
+  if (!name || !email || !phone || !pass) {
+    Toast.warning("Missing fields", "Please fill Name, Email, Phone and Password.");
+    return;
+  }
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if (!emailOk) { Toast.error("Invalid email", "Please enter a valid email."); return; }
+  if (pass.length < 6) { Toast.error("Weak password", "Password must be at least 6 characters."); return; }
+
+  const btn = document.getElementById("saveNewGuestBtn");
+  if (btn) UI.btnLoading(btn, "Saving...");
+  try {
+    const res = await AuthAPI.register({ name, email, phone, password: pass, role: "guest" });
+    const newGuest = res.user || res;
+    Toast.success("Guest Created", `${name} added as a guest.`);
+
+    // Auto-select the new guest
+    document.getElementById("bookGuestId").value = newGuest.id;
+    const infoEl = document.getElementById("selectedGuestInfo");
+    if (infoEl) infoEl.innerHTML = `<div class="info-box success" style="padding:8px 12px;margin-top:6px">✅ New guest registered & selected: <strong>${UI.escape(name)}</strong></div>`;
+
+    // Hide form, add to dropdown
+    document.getElementById("newGuestFormWrap").style.display = "none";
+    const select = document.getElementById("bookGuestSelect");
+    const opt    = document.createElement("option");
+    opt.value    = newGuest.id;
+    opt.text     = `${name} | ${email} | ${phone}`;
+    opt.selected = true;
+    select.appendChild(opt);
+
+    // Reset form
+    ["newGuestName","newGuestEmail","newGuestPhone","newGuestPass"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = "";
+    });
+  } catch (err) {
+    Toast.error("Failed to add guest", err.message);
+  } finally {
+    if (btn) UI.btnReset(btn);
   }
 }
 
 async function handleBookingSubmit(e) {
   e.preventDefault();
-  const checkIn = document.getElementById("bookCheckIn").value;
+  const checkIn  = document.getElementById("bookCheckIn").value;
   const checkOut = document.getElementById("bookCheckOut").value;
-  const guests = document.getElementById("bookGuests").value;
-  const showErr = (id, msg) => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.textContent = msg;
-      el.classList.add("show");
-    }
-  };
-  const clearErr = (id) => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.textContent = "";
-      el.classList.remove("show");
-    }
-  };
+  const guests   = document.getElementById("bookGuests").value;
+  const role     = Auth.getRole();
 
-  clearErr("errCheckIn");
-  clearErr("errCheckOut");
+  const showErr = (id, msg) => { const el = document.getElementById(id); if (el) { el.textContent = msg; el.classList.add("show"); } };
+  const clearErr = (id) => { const el = document.getElementById(id); if (el) { el.textContent = ""; el.classList.remove("show"); } };
+
+  clearErr("errCheckIn"); clearErr("errCheckOut"); clearErr("errGuestId");
   let ok = true;
-  if (!checkIn) {
-    showErr("errCheckIn", "Check-in date required.");
-    ok = false;
+  if (!checkIn)  { showErr("errCheckIn",  "Check-in date required.");  ok = false; }
+  if (!checkOut) { showErr("errCheckOut", "Check-out date required."); ok = false; }
+  if (checkIn && checkOut && checkOut <= checkIn) { showErr("errCheckOut", "Must be after check-in."); ok = false; }
+
+  // Validate guest selection for admin/staff
+  if ((role === "admin" || role === "staff")) {
+    const guestId = document.getElementById("bookGuestId")?.value;
+    if (!guestId) {
+      showErr("errGuestId", "Please select a guest for this booking.");
+      ok = false;
+    }
   }
-  if (!checkOut) {
-    showErr("errCheckOut", "Check-out date required.");
-    ok = false;
-  }
-  if (checkIn && checkOut && checkOut <= checkIn) {
-    showErr("errCheckOut", "Must be after check-in.");
-    ok = false;
-  }
+
   if (!ok) return;
 
-  const roomId =
-    bookingState.room?.id ||
-    bookingState.room?._id ||
-    document.getElementById("bookRoomId")?.value;
-  if (!roomId) {
-    Toast.error("No room", "Please go back and select a room.");
-    goToBookingStep(1);
-    return;
-  }
+  const roomId = bookingState.room?.id || bookingState.room?._id || document.getElementById("bookRoomId")?.value;
+  if (!roomId) { Toast.error("No room", "Please go back and select a room."); goToBookingStep(1); return; }
+
+  // Get selected payment method
+  const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || "cash";
+
+  // Get selected services
+  const selectedServices = getSelectedServices();
+  const servicesTotal    = getSelectedServicesTotal();
+
+  // Get guest ID if admin/staff
+  const guestId = (role === "admin" || role === "staff")
+    ? document.getElementById("bookGuestId")?.value
+    : null;
 
   const btn = e.target.querySelector("[type=submit]");
   UI.btnLoading(btn, "Confirming...");
   try {
-    const res = await BookingsAPI.create({
+    const payload = {
       roomId,
       checkIn,
       checkOut,
-      guests: parseInt(guests),
+      guests       : parseInt(guests),
+      paymentMethod,
+      services     : selectedServices,
+      servicesTotal,
       specialRequests: document.getElementById("bookSpecialReq")?.value || "",
-    });
+    };
+    if (guestId) payload.guestId = parseInt(guestId);
+
+    const res     = await BookingsAPI.create(payload);
     const booking = res.booking || res;
-    const bId = booking.id || booking._id || "—";
+    const bId     = booking.id || booking._id || "—";
 
     document.getElementById("confirmationBookingId").textContent = "#" + bId;
     const detEl = document.getElementById("confirmationDetails");
-    if (detEl)
-      detEl.innerHTML = `
+    if (detEl) detEl.innerHTML = `
       <div><strong>Room:</strong> ${UI.escape(bookingState.room?.name || "Room")}</div>
       <div><strong>Check-In:</strong> ${UI.formatDate(checkIn)}</div>
       <div><strong>Check-Out:</strong> ${UI.formatDate(checkOut)}</div>
       <div><strong>Guests:</strong> ${guests}</div>
-      <div><strong>Total:</strong> ${UI.currency(bookingState.formData.total || booking.total || 0)}</div>`;
+      <div><strong>Payment:</strong> ${paymentMethod.replace("_"," ").toUpperCase()}</div>
+      ${selectedServices.length ? `<div><strong>Services:</strong> ${selectedServices.map(s=>s.name).join(", ")}</div>` : ""}
+      <div><strong>Total:</strong> ${UI.currency(bookingState.formData.total || booking.totalAmount || 0)}</div>`;
 
     goToBookingStep(3);
     Toast.success("Booking Confirmed! 🎉", "Booking #" + bId + " created.");
@@ -1841,7 +2259,363 @@ async function deleteUser(id) {
     loadUsersTable();
   } catch (err) {
     Toast.error("Error", err.message);
+}
+}
+
+// ── LOAD STAFF TABLE ────────────────────────────────────────
+async function loadStaffTable() {
+  const tbody = document.getElementById("staffTbody");
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="7" class="table-empty"><div class="page-loader"><div class="spinner"></div></div></td></tr>';
+  try {
+    const data = await UsersAPI.getStaffProfiles();
+    const staff = data.staff || data.data || [];
+    if (!staff.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="table-empty">No staff members found.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = staff.map(u => {
+      const lastPaid = u.lastPaidDate ? UI.formatDate(u.lastPaidDate) : "Never";
+      const salary   = Number(u.salary || 0);
+      return `<tr>
+        <td><strong>${u.id}</strong></td>
+        <td>${UI.escape(u.name)}</td>
+        <td>
+          <div style="font-size:0.85rem;font-weight:600">${UI.escape(u.position||"Staff")}</div>
+          <div style="font-size:0.78rem;color:var(--text-light)">${UI.escape(u.department||"—")}</div>
+        </td>
+        <td style="font-weight:700;color:var(--royal-blue-dark)">₹${salary.toLocaleString("en-IN")}/mo</td>
+        <td style="font-size:0.82rem;color:var(--text-light)">${lastPaid}</td>
+        <td class="actions-cell">
+          <button class="btn btn-success btn-sm" onclick="paySalaryClick(${u.id},${salary},'${UI.escape(u.name)}')" title="Pay Salary">💰 Pay</button>
+          <button class="btn btn-outline btn-sm" onclick="editStaffProfile(${u.id},'${UI.escape(u.name)}','${UI.escape(u.position||'')}','${UI.escape(u.department||'')}',${salary})" title="Edit Profile">Edit</button>
+          <button class="btn btn-outline btn-sm" onclick="viewSalaryHistory(${u.id},'${UI.escape(u.name)}')" title="Payment History">History</button>
+        </td>
+      </tr>`;
+    }).join("");
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="7" class="table-empty">${UI.escape(err.message)}</td></tr>`;
   }
+}
+
+// ── PAY SALARY ───────────────────────────────────────────────
+async function paySalaryClick(userId, defaultSalary, name) {
+  const ok = await Modal.confirm({
+    title: `Pay Salary — ${name}`,
+    message: `Confirm salary payment of ₹${Number(defaultSalary).toLocaleString("en-IN")} to ${name}?`,
+    confirmText: "✅ Pay Now",
+  });
+  if (!ok) return;
+  try {
+    const r = await UsersAPI.paySalary(userId, { amount: defaultSalary });
+    Toast.success("Salary Paid!", r.message || `₹${Number(defaultSalary).toLocaleString("en-IN")} paid to ${name}`);
+    loadStaffTable();
+  } catch (err) {
+    Toast.error("Payment Failed", err.message);
+  }
+}
+
+// ── VIEW SALARY HISTORY ──────────────────────────────────────
+async function viewSalaryHistory(userId, name) {
+  try {
+    const r = await UsersAPI.getSalaryHistory(userId);
+    const payments = r.payments || [];
+    let overlay = document.getElementById("salaryHistoryOverlay");
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.id = "salaryHistoryOverlay";
+      overlay.className = "modal-overlay";
+      overlay.innerHTML = `
+        <div class="modal modal-lg">
+          <div class="modal-header">
+            <h3 id="salHistTitle">Salary History</h3>
+            <span class="modal-close" data-modal-close="salaryHistoryOverlay" role="button">✕</span>
+          </div>
+          <div class="modal-body" id="salHistBody"></div>
+          <div class="modal-footer">
+            <button class="btn btn-outline" data-modal-close="salaryHistoryOverlay">Close</button>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+    }
+    document.getElementById("salHistTitle").textContent = `💰 Salary History — ${name}`;
+    document.getElementById("salHistBody").innerHTML = payments.length
+      ? `<table class="data-table"><thead><tr><th>#</th><th>Amount</th><th>Date</th><th>Remarks</th></tr></thead><tbody>
+          ${payments.map((p, i) => `
+            <tr>
+              <td>${i+1}</td>
+              <td style="font-weight:700;color:var(--success)">₹${Number(p.amount).toLocaleString("en-IN")}</td>
+              <td>${UI.formatDate(p.paidDate)}</td>
+              <td style="font-size:0.82rem">${UI.escape(p.remarks||"—")}</td>
+            </tr>`).join("")}
+         </tbody></table>`
+      : `<div class="empty-state"><div class="empty-icon">💳</div><h3>No payments yet</h3><p>No salary payments have been made.</p></div>`;
+    Modal.open("salaryHistoryOverlay");
+  } catch (err) {
+    Toast.error("Error", err.message);
+  }
+}
+
+// ── EDIT STAFF PROFILE ───────────────────────────────────────
+function editStaffProfile(userId, name, position, department, salary) {
+  let overlay = document.getElementById("editStaffOverlay");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.id = "editStaffOverlay";
+    overlay.className = "modal-overlay";
+    overlay.innerHTML = `
+      <div class="modal">
+        <div class="modal-header">
+          <h3 id="editStaffTitle">Edit Staff Profile</h3>
+          <span class="modal-close" data-modal-close="editStaffOverlay" role="button">✕</span>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="editStaffUserId">
+          <div class="form-group"><label class="form-label">Position</label><input type="text" id="editStaffPos" class="form-control"></div>
+          <div class="form-group">
+            <label class="form-label">Department</label>
+            <select id="editStaffDept" class="form-control">
+              <option>Front Desk</option><option>Housekeeping</option><option>Food & Beverage</option>
+              <option>Management</option><option>Security</option><option>Kitchen</option><option>Maintenance</option>
+            </select>
+          </div>
+          <div class="form-group"><label class="form-label">Monthly Salary (₹)</label><input type="number" id="editStaffSal" class="form-control" min="0"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" data-modal-close="editStaffOverlay">Cancel</button>
+          <button class="btn btn-primary" onclick="saveStaffProfile()">💾 Save</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+  }
+  document.getElementById("editStaffTitle").textContent = `Edit — ${name}`;
+  document.getElementById("editStaffUserId").value = userId;
+  document.getElementById("editStaffPos").value   = position;
+  document.getElementById("editStaffDept").value  = department;
+  document.getElementById("editStaffSal").value   = salary;
+  Modal.open("editStaffOverlay");
+}
+
+async function saveStaffProfile() {
+  const userId     = document.getElementById("editStaffUserId")?.value;
+  const position   = document.getElementById("editStaffPos")?.value;
+  const department = document.getElementById("editStaffDept")?.value;
+  const salary     = document.getElementById("editStaffSal")?.value;
+  try {
+    await UsersAPI.updateStaffProfile(userId, { position, department, salary: Number(salary) });
+    Toast.success("Saved", "Staff profile updated.");
+    Modal.close("editStaffOverlay");
+    loadStaffTable();
+  } catch (err) {
+    Toast.error("Error", err.message);
+  }
+}
+
+// ── LOAD BILLING TABLE ──────────────────────────────────────
+async function loadBillingTable() {
+  const tbody = document.getElementById("billingTbody");
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="7" class="table-empty"><div class="page-loader"><div class="spinner"></div></div></td></tr>';
+  try {
+    const data = await BookingsAPI.list({ limit: "all" });
+    const bookings = data.bookings || data.data || [];
+    if (!bookings.length) {
+      tbody.innerHTML = '<tr><td colspan="7" class="table-empty">No payment records found.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = bookings.map((b, i) => `
+      <tr>
+        <td>#${i + 1}</td>
+        <td>#${b.id}</td>
+        <td>${UI.escape(b.guestName || "—")}</td>
+        <td style="font-weight:700;color:var(--royal-blue-dark)">₹${Number(b.totalAmount || 0).toLocaleString("en-IN")}</td>
+        <td>${b.paymentMethod ? `<span class="badge badge-info">${b.paymentMethod.replace("_"," ")}</span>` : "—"}</td>
+        <td>${UI.statusBadge(b.paymentStatus || "paid")}</td>
+        <td>${UI.formatDate(b.createdAt)}</td>
+      </tr>`).join("");
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="7" class="table-empty">${UI.escape(err.message)}</td></tr>`;
+  }
+}
+
+// ── LOAD REPORTS SUMMARY ────────────────────────────────────
+async function loadReportsSummary() {
+  try {
+    const [dashData, bookData] = await Promise.all([
+      ReportsAPI.dashboard(),
+      BookingsAPI.list({ limit: "500" }),
+    ]);
+    const stats = dashData.data || dashData;
+    const bookings = bookData.bookings || bookData.data || [];
+
+    // Total revenue from payments
+    const totalRev = bookings.reduce((s, b) => s + Number(b.totalAmount || 0), 0);
+    const occRate = stats.totalRooms > 0
+      ? Math.round((stats.occupied / stats.totalRooms) * 100) : 0;
+
+    // Average stay nights
+    let totalNights = 0, cnt = 0;
+    bookings.forEach(b => {
+      if (b.checkIn && b.checkOut) {
+        totalNights += UI.nightsBetween(b.checkIn, b.checkOut);
+        cnt++;
+      }
+    });
+    const avgStay = cnt > 0 ? (totalNights / cnt).toFixed(1) : "—";
+
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    set("rptTotalRev",  `₹${totalRev.toLocaleString("en-IN")}`);
+    set("rptTotalBook", bookings.length);
+    set("rptOccRate",   `${occRate}%`);
+    set("rptAvgStay",   avgStay);
+    Toast.success("Reports", "Stats refreshed successfully.");
+  } catch (err) {
+    Toast.error("Error", err.message);
+  }
+}
+
+// ── EXPORT CSV ──────────────────────────────────────────────
+async function exportCSV() {
+  try {
+    Toast.info("Exporting...", "Preparing CSV file.");
+    const data = await BookingsAPI.list({ limit: "500" });
+    const bookings = data.bookings || data.data || [];
+    if (!bookings.length) { Toast.warning("No data", "No bookings to export."); return; }
+
+    const headers = ["#ID","Guest","Email","Phone","Room","Type","Check-In","Check-Out","Nights","Amount","Status","Payment","Booked On"];
+    const rows = bookings.map(b => {
+      const nights = b.checkIn && b.checkOut ? UI.nightsBetween(b.checkIn, b.checkOut) : "";
+      return [
+        b.id, b.guestName||"", b.guestEmail||"", b.guestPhone||"",
+        b.roomNumber||"", b.roomType||"",
+        b.checkIn||"", b.checkOut||"", nights,
+        b.totalAmount||0, b.status||"", b.paymentMethod||"",
+        b.createdAt ? new Date(b.createdAt).toLocaleDateString("en-IN") : "",
+      ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(",");
+    });
+
+    const csv = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href     = url;
+    a.download = `taj_bookings_${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    Toast.success("Exported!", `${bookings.length} bookings downloaded.`);
+  } catch (err) {
+    Toast.error("Export failed", err.message);
+  }
+}
+
+// ── ADD GUEST MODAL ─────────────────────────────────────────
+function openAddGuestModal() {
+  let overlay = document.getElementById("addGuestOverlay");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.id = "addGuestOverlay";
+    overlay.className = "modal-overlay";
+    overlay.innerHTML = `
+      <div class="modal">
+        <div class="modal-header">
+          <h3>➕ Add New Guest</h3>
+          <span class="modal-close" data-modal-close="addGuestOverlay" role="button">✕</span>
+        </div>
+        <div class="modal-body">
+          <div class="form-group"><label class="form-label">Full Name *</label><input type="text" id="agName" class="form-control" placeholder="Rajesh Kumar"></div>
+          <div class="form-group"><label class="form-label">Email *</label><input type="email" id="agEmail" class="form-control" placeholder="guest@email.com"></div>
+          <div class="form-group"><label class="form-label">Phone *</label><input type="tel" id="agPhone" class="form-control" placeholder="9876543210"></div>
+          <div class="form-group"><label class="form-label">Password *</label><input type="password" id="agPass" class="form-control" placeholder="Min 6 characters"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" data-modal-close="addGuestOverlay">Cancel</button>
+          <button class="btn btn-primary" onclick="submitAddGuest()">💾 Add Guest</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+  }
+  Modal.open("addGuestOverlay");
+}
+
+async function submitAddGuest() {
+  const name  = document.getElementById("agName")?.value?.trim();
+  const email = document.getElementById("agEmail")?.value?.trim();
+  const phone = document.getElementById("agPhone")?.value?.trim();
+  const pass  = document.getElementById("agPass")?.value?.trim();
+  if (!name || !email || !phone || !pass) { Toast.warning("Missing fields", "All fields are required."); return; }
+  try {
+    await AuthAPI.register({ name, email, phone, password: pass, role: "guest" });
+    Toast.success("Guest Added", `${name} has been registered.`);
+    Modal.close("addGuestOverlay");
+    loadUsersTable("guest");
+  } catch (err) {
+    Toast.error("Failed", err.message);
+  }
+}
+
+// ── ADD STAFF MODAL ─────────────────────────────────────────
+function openAddStaffModal() {
+  let overlay = document.getElementById("addStaffOverlay");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.id = "addStaffOverlay";
+    overlay.className = "modal-overlay";
+    overlay.innerHTML = `
+      <div class="modal">
+        <div class="modal-header">
+          <h3>➕ Add New Staff</h3>
+          <span class="modal-close" data-modal-close="addStaffOverlay" role="button">✕</span>
+        </div>
+        <div class="modal-body">
+          <div class="form-group"><label class="form-label">Full Name *</label><input type="text" id="asName" class="form-control" placeholder="Staff Member Name"></div>
+          <div class="form-group"><label class="form-label">Email *</label><input type="email" id="asEmail" class="form-control" placeholder="staff@tajhotels.com"></div>
+          <div class="form-group"><label class="form-label">Phone</label><input type="tel" id="asPhone" class="form-control" placeholder="9876543210"></div>
+          <div class="form-group"><label class="form-label">Password *</label><input type="password" id="asPass" class="form-control" placeholder="Min 6 characters"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" data-modal-close="addStaffOverlay">Cancel</button>
+          <button class="btn btn-primary" onclick="submitAddStaff()">💾 Add Staff</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+  }
+  Modal.open("addStaffOverlay");
+}
+
+async function submitAddStaff() {
+  const name  = document.getElementById("asName")?.value?.trim();
+  const email = document.getElementById("asEmail")?.value?.trim();
+  const phone = document.getElementById("asPhone")?.value?.trim();
+  const pass  = document.getElementById("asPass")?.value?.trim();
+  if (!name || !email || !pass) { Toast.warning("Missing fields", "Name, email and password required."); return; }
+  try {
+    await UsersAPI.createStaff({ name, email, phone: phone||"", password: pass });
+    Toast.success("Staff Added", `${name} has been added as staff.`);
+    Modal.close("addStaffOverlay");
+    loadStaffTable();
+  } catch (err) {
+    Toast.error("Failed", err.message);
+  }
+}
+
+// ── SETTINGS FORM SAVE ──────────────────────────────────────
+function initSettingsForm() {
+  document.getElementById("settingsForm")?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    // Save to localStorage for now (hotel config)
+    const settings = {
+      name    : document.getElementById("settingName")?.value,
+      phone   : document.getElementById("settingPhone")?.value,
+      address : document.getElementById("settingAddress")?.value,
+      email   : document.getElementById("settingEmail")?.value,
+      checkIn : document.getElementById("settingCheckIn")?.value,
+      checkOut: document.getElementById("settingCheckOut")?.value,
+      tax     : document.getElementById("settingTax")?.value,
+      upi     : document.getElementById("settingUpi")?.value,
+    };
+    localStorage.setItem("taj_settings", JSON.stringify(settings));
+    Toast.success("Settings Saved", "Hotel settings updated successfully.");
+  });
 }
 
 /*  SHARED: Booking detail modal (used by both staff and guest views) */
@@ -1849,35 +2623,110 @@ async function viewBookingDetail(id) {
   try {
     const data = await BookingsAPI.get(id);
     const b = data.booking || data;
+
+    // Calculate nights
+    const nights = b.checkIn && b.checkOut ? UI.nightsBetween(b.checkIn, b.checkOut) : "—";
+
+    // Build services HTML
+    const servicesArr = Array.isArray(b.services) ? b.services : [];
+    const servicesHtml = servicesArr.length
+      ? `<div style="margin-top:4px">
+          ${servicesArr.map(s =>
+            `<span style="display:inline-block;background:rgba(26,35,126,0.08);color:var(--royal-blue-dark);
+              padding:3px 10px;border-radius:20px;font-size:0.8rem;margin:2px">
+              ${UI.escape(s.name)} — ₹${(s.price||0).toLocaleString("en-IN")}
+            </span>`
+          ).join("")}
+        </div>`
+      : '<span style="color:var(--text-light)">None</span>';
+
+    // Build payment method badge
+    const payBadge = b.paymentMethod
+      ? `<span class="badge badge-info" style="text-transform:capitalize">${b.paymentMethod.replace("_"," ")}</span>`
+      : "—";
+
+    const html = `
+      <!-- Header -->
+      <div style="background:linear-gradient(135deg,var(--royal-blue-dark),var(--royal-blue));
+        border-radius:var(--radius-md);padding:18px 20px;color:white;margin-bottom:18px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:0.82rem;opacity:0.75">Booking Reference</div>
+            <div style="font-size:1.4rem;font-weight:800">#${b.id}</div>
+          </div>
+          <div style="text-align:right">
+            ${UI.statusBadge(b.status)}
+            <div style="font-size:0.78rem;opacity:0.7;margin-top:4px">
+              Booked: ${UI.formatDate(b.createdAt)}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Guest Info -->
+      <div style="background:var(--bg-light);border-radius:var(--radius-md);padding:14px 16px;margin-bottom:12px">
+        <div style="font-weight:700;color:var(--royal-blue-dark);margin-bottom:10px;font-size:0.9rem">👤 Guest Information</div>
+        <div class="detail-row"><span class="detail-label">Name</span><span class="detail-value"><strong>${UI.escape(b.guestName||"—")}</strong></span></div>
+        ${b.guestEmail ? `<div class="detail-row"><span class="detail-label">Email</span><span class="detail-value">${UI.escape(b.guestEmail)}</span></div>` : ""}
+        ${b.guestPhone ? `<div class="detail-row"><span class="detail-label">Phone</span><span class="detail-value">${UI.escape(b.guestPhone)}</span></div>` : ""}
+        <div class="detail-row"><span class="detail-label">Guests</span><span class="detail-value">${b.adults||1} Adult${(b.adults||1)>1?"s":""}</span></div>
+      </div>
+
+      <!-- Room & Stay Info -->
+      <div style="background:var(--bg-light);border-radius:var(--radius-md);padding:14px 16px;margin-bottom:12px">
+        <div style="font-weight:700;color:var(--royal-blue-dark);margin-bottom:10px;font-size:0.9rem">🛏️ Room & Stay</div>
+        <div class="detail-row"><span class="detail-label">Room</span><span class="detail-value"><strong>${UI.escape(b.roomNumber||"—")}</strong></span></div>
+        <div class="detail-row"><span class="detail-label">Type</span><span class="detail-value">${UI.escape(b.roomType||"—")}</span></div>
+        <div class="detail-row"><span class="detail-label">Check-In</span><span class="detail-value">${UI.formatDate(b.checkIn)}</span></div>
+        <div class="detail-row"><span class="detail-label">Check-Out</span><span class="detail-value">${UI.formatDate(b.checkOut)}</span></div>
+        <div class="detail-row"><span class="detail-label">Nights</span><span class="detail-value"><strong>${nights}</strong></span></div>
+        <div class="detail-row"><span class="detail-label">Room Rate</span><span class="detail-value">₹${Number(b.roomPrice||0).toLocaleString("en-IN")}/night</span></div>
+      </div>
+
+      <!-- Services -->
+      <div style="background:var(--bg-light);border-radius:var(--radius-md);padding:14px 16px;margin-bottom:12px">
+        <div style="font-weight:700;color:var(--royal-blue-dark);margin-bottom:10px;font-size:0.9rem">🛎️ Additional Services</div>
+        ${servicesHtml}
+        ${b.specialRequests ? `
+          <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,0,0,0.06)">
+            <div style="font-size:0.82rem;color:var(--text-light);margin-bottom:4px">Special Requests:</div>
+            <div style="font-size:0.88rem;color:var(--text-mid)">${UI.escape(b.specialRequests)}</div>
+          </div>` : ""}
+      </div>
+
+      <!-- Billing -->
+      <div style="background:var(--bg-light);border-radius:var(--radius-md);padding:14px 16px">
+        <div style="font-weight:700;color:var(--royal-blue-dark);margin-bottom:10px;font-size:0.9rem">💰 Billing & Payment</div>
+        <div class="detail-row"><span class="detail-label">Room Charges</span><span class="detail-value">₹${(Number(b.roomPrice||0)*Number(nights||1)).toLocaleString("en-IN")}</span></div>
+        ${(b.servicesTotal && Number(b.servicesTotal)>0) ? `<div class="detail-row"><span class="detail-label">Services</span><span class="detail-value">₹${Number(b.servicesTotal).toLocaleString("en-IN")}</span></div>` : ""}
+        <div class="detail-row" style="border-top:2px solid var(--royal-blue);padding-top:8px;margin-top:4px">
+          <span class="detail-label" style="font-weight:700">Total Amount</span>
+          <span class="detail-value" style="font-weight:800;color:var(--royal-blue-dark);font-size:1.05rem">₹${Number(b.totalAmount||b.paidAmount||0).toLocaleString("en-IN")}</span>
+        </div>
+        <div class="detail-row"><span class="detail-label">Payment Method</span><span class="detail-value">${payBadge}</span></div>
+        <div class="detail-row"><span class="detail-label">Payment Status</span><span class="detail-value">${UI.statusBadge(b.paymentStatus||"pending")}</span></div>
+        ${b.transactionId ? `<div class="detail-row"><span class="detail-label">Transaction ID</span><span class="detail-value" style="font-size:0.82rem">${UI.escape(b.transactionId)}</span></div>` : ""}
+      </div>`;
+
     let overlay = document.getElementById("bookingDetailOverlay");
     if (!overlay) {
       overlay = document.createElement("div");
       overlay.id = "bookingDetailOverlay";
       overlay.className = "modal-overlay";
       overlay.innerHTML = `
-        <div class="modal">
+        <div class="modal modal-lg">
           <div class="modal-header">
             <h3>Booking Details</h3>
             <span class="modal-close" data-modal-close="bookingDetailOverlay" role="button">✕</span>
           </div>
-          <div class="modal-body" id="bookingDetailBody"></div>
+          <div class="modal-body" id="bookingDetailBody" style="max-height:70vh;overflow-y:auto"></div>
           <div class="modal-footer">
             <button class="btn btn-outline" data-modal-close="bookingDetailOverlay">Close</button>
           </div>
         </div>`;
       document.body.appendChild(overlay);
     }
-    document.getElementById("bookingDetailBody").innerHTML = `
-      <div class="detail-row"><span class="detail-label">Booking #</span><span class="detail-value">${b.id || b._id}</span></div>
-      <div class="detail-row"><span class="detail-label">Guest</span><span class="detail-value">${UI.escape(b.guestName || b.guest?.name || "—")}</span></div>
-      <div class="detail-row"><span class="detail-label">Room</span><span class="detail-value">${UI.escape(b.roomNumber || b.room?.number || b.room?.name || "—")}</span></div>
-      <div class="detail-row"><span class="detail-label">Check-In</span><span class="detail-value">${UI.formatDate(b.checkIn)}</span></div>
-      <div class="detail-row"><span class="detail-label">Check-Out</span><span class="detail-value">${UI.formatDate(b.checkOut)}</span></div>
-      <div class="detail-row"><span class="detail-label">Guests</span><span class="detail-value">${b.guests || 1}</span></div>
-      <div class="detail-row"><span class="detail-label">Total</span><span class="detail-value">${UI.currency(b.total || b.totalAmount)}</span></div>
-      <div class="detail-row"><span class="detail-label">Status</span><span class="detail-value">${UI.statusBadge(b.status)}</span></div>
-      ${b.specialRequests ? `<div class="detail-row"><span class="detail-label">Requests</span><span class="detail-value">${UI.escape(b.specialRequests)}</span></div>` : ""}
-    `;
+    document.getElementById("bookingDetailBody").innerHTML = html;
     Modal.open("bookingDetailOverlay");
   } catch (err) {
     Toast.error("Error", err.message);
@@ -1967,3 +2816,22 @@ window.loadUsersTable = loadUsersTable;
 window.loadMyBookings = loadMyBookings;
 window.viewBookingDetail = viewBookingDetail;
 window.viewUser = viewUser;
+window.registerNewGuestInline = registerNewGuestInline;
+window.loadGuestOptions = loadGuestOptions;
+window.updateServiceTotal = updateServiceTotal;
+window.highlightPayment = highlightPayment;
+window.paySalaryClick = paySalaryClick;
+window.viewSalaryHistory = viewSalaryHistory;
+window.editStaffProfile = editStaffProfile;
+window.saveStaffProfile = saveStaffProfile;
+window.loadStaffTable = loadStaffTable;
+window.markRoomMaintenance = markRoomMaintenance;
+window.markRoomAvailable = markRoomAvailable;
+window.loadHousekeepingRooms = loadHousekeepingRooms;
+window.loadMaintenanceRooms = loadMaintenanceRooms;
+window.loadReportsSummary = loadReportsSummary;
+window.exportCSV = exportCSV;
+window.openAddGuestModal = openAddGuestModal;
+window.openAddStaffModal = openAddStaffModal;
+window.submitAddGuest = submitAddGuest;
+window.submitAddStaff = submitAddStaff;

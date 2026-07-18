@@ -1,15 +1,14 @@
-# Environment variables - never commit secrets
+# Environment variables — never commit secrets
 .env
-.env.*
+.env.local
+.env.production
 
-# Database files - sensitive
-database.sql
-import-db.js
-seed-database.js
-verify-db.js
-
-# Node modules - install via npm
+# Node modules — install via: npm install
 node_modules/
+
+# Uploads — user-uploaded files
+uploads/*
+!uploads/.gitkeep
 
 # Logs
 *.log

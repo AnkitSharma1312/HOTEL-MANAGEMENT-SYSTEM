@@ -74,7 +74,7 @@ const getAllRooms = async (filters = {}) => {
 
   if (filters.capacity) {
     query += " AND rt.capacity >= ?";
-    params.push(filters.capacity);
+    params.push(parseInt(filters.capacity, 10));
   }
 
   if (filters.status) {
@@ -86,28 +86,29 @@ const getAllRooms = async (filters = {}) => {
 
   if (filters.minPrice) {
     query += " AND rt.price_per_night >= ?";
-    params.push(filters.minPrice);
+    params.push(parseFloat(filters.minPrice));
   }
 
   if (filters.maxPrice) {
     query += " AND rt.price_per_night <= ?";
-    params.push(filters.maxPrice);
+    params.push(parseFloat(filters.maxPrice));
   }
 
   query += " ORDER BY r.created_at DESC";
 
-  if (filters.limit) {
-    query += " LIMIT ?";
-    params.push(Number(filters.limit));
+  // mysql2 pool.execute() LIMIT/OFFSET placeholders support nahi karta
+  // dynamic queries mein, isliye directly embed karo (parseInt se safe hai)
+  const limitVal = filters.limit ? parseInt(filters.limit, 10) : null;
+  const pageVal  = filters.page  ? parseInt(filters.page,  10) : 1;
+
+  if (limitVal && limitVal > 0) {
+    const offset = pageVal > 1 ? (pageVal - 1) * limitVal : 0;
+    query += ` LIMIT ${limitVal}`;
+    if (offset > 0) query += ` OFFSET ${offset}`;
   }
 
-  if (filters.page && filters.limit) {
-    const offset = (Number(filters.page) - 1) * Number(filters.limit);
-    query = query.replace(" LIMIT ?", " LIMIT ? OFFSET ?");
-    params.push(offset);
-  }
-
-  const [rows] = await pool.execute(query, params);
+  // pool.query (not pool.execute) for dynamic queries with LIKE/LIMIT
+  const [rows] = await pool.query(query, params);
   return rows;
 };
 

@@ -1,3 +1,31 @@
 {
-  "liveServer.settings.port": 5501
+  "liveServer.settings.port": 5503,
+  "cSpell.words": [
+    "Bunder",
+    "checkins",
+    "Colaba",
+    "Cpath",
+    "Csvg",
+    "Glassmorphism",
+    "grandluxe",
+    "Grandmont",
+    "Jamsetji",
+    "Kowalski",
+    "Kumar",
+    "middot",
+    "minmax",
+    "novalidate",
+    "onclick",
+    "onmouseout",
+    "onmouseover",
+    "Priya",
+    "qrcode",
+    "Rajesh",
+    "rgba",
+    "stylesheet",
+    "tabindex",
+    "tajhotels",
+    "topbar"
+  ],
+  "html.autoClosingTags": false
 }

@@ -7,10 +7,13 @@ const createBooking = async ({
   check_out_date,
   guests,
   total_amount,
+  services = null,
+  services_total = 0,
+  special_requests = "",
   status = "pending",
 }) => {
   const [result] = await pool.execute(
-    "INSERT INTO bookings (guest_id, room_id, check_in, check_out, adults, children, total_amount, booking_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+    "INSERT INTO bookings (guest_id, room_id, check_in, check_out, adults, children, total_amount, booking_status, services, services_total, special_requests) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
     [
       user_id,
       room_id,
@@ -20,6 +23,9 @@ const createBooking = async ({
       0,
       total_amount,
       status,
+      services ? JSON.stringify(services) : null,
+      services_total || 0,
+      special_requests || "",
     ],
   );
   return result.insertId;
@@ -31,20 +37,32 @@ const getBookings = async (userId = null, role = null) => {
            b.check_in AS checkIn, b.check_out AS checkOut,
            b.adults, b.children, b.total_amount AS totalAmount,
            b.booking_status AS status, b.created_at AS createdAt,
-           r.room_number AS roomNumber, u.full_name AS guestName
+           b.services, b.services_total AS servicesTotal,
+           b.special_requests AS specialRequests,
+           r.room_number AS roomNumber,
+           rt.type_name AS roomType,
+           rt.price_per_night AS roomPrice,
+           u.full_name AS guestName, u.email AS guestEmail, u.phone AS guestPhone,
+           p.payment_method AS paymentMethod, p.payment_status AS paymentStatus,
+           p.transaction_id AS transactionId, p.amount AS paidAmount
     FROM bookings b
     JOIN rooms r ON b.room_id = r.id
-    JOIN users u ON b.guest_id = u.id`;
+    JOIN room_types rt ON r.room_type_id = rt.id
+    JOIN users u ON b.guest_id = u.id
+    LEFT JOIN payments p ON p.booking_id = b.id`;
   const params = [];
 
-  if (userId && role !== "admin") {
+  if (userId && role !== "admin" && role !== "staff") {
     query += " WHERE b.guest_id = ?";
     params.push(userId);
   }
 
   query += " ORDER BY b.created_at DESC";
   const [rows] = await pool.execute(query, params);
-  return rows;
+  return rows.map(r => ({
+    ...r,
+    services: r.services ? (typeof r.services === "string" ? JSON.parse(r.services) : r.services) : [],
+  }));
 };
 
 const getBookingById = async (id) => {
@@ -53,31 +71,53 @@ const getBookingById = async (id) => {
             b.check_in AS checkIn, b.check_out AS checkOut,
             b.adults, b.children, b.total_amount AS totalAmount,
             b.booking_status AS status, b.created_at AS createdAt,
-            r.room_number AS roomNumber, u.full_name AS guestName
+            b.services, b.services_total AS servicesTotal,
+            b.special_requests AS specialRequests,
+            r.room_number AS roomNumber,
+            rt.type_name AS roomType,
+            rt.price_per_night AS roomPrice,
+            u.full_name AS guestName, u.email AS guestEmail, u.phone AS guestPhone,
+            p.payment_method AS paymentMethod, p.payment_status AS paymentStatus,
+            p.transaction_id AS transactionId, p.amount AS paidAmount
      FROM bookings b
      JOIN rooms r ON b.room_id = r.id
+     JOIN room_types rt ON r.room_type_id = rt.id
      JOIN users u ON b.guest_id = u.id
+     LEFT JOIN payments p ON p.booking_id = b.id
      WHERE b.id = ?`,
     [id],
   );
-  return rows[0];
+  const row = rows[0];
+  if (!row) return undefined;
+  return {
+    ...row,
+    services: row.services ? (typeof row.services === "string" ? JSON.parse(row.services) : row.services) : [],
+  };
 };
 
 const updateBooking = async (id, data) => {
+  // Only allow updating these specific columns — prevents SQL errors from extra fields
+  const ALLOWED = {
+    booking_status  : "booking_status",
+    status          : "booking_status",
+    adults          : "adults",
+    children        : "children",
+    special_requests: "special_requests",
+    total_amount    : "total_amount",
+  };
+
   const fields = [];
   const values = [];
 
   Object.entries(data).forEach(([key, value]) => {
-    if (value !== undefined) {
-      const mappedKey = key === "status" ? "booking_status" : key;
-      fields.push(`${mappedKey} = ?`);
+    const col = ALLOWED[key];
+    if (col && value !== undefined && value !== null) {
+      fields.push(`${col} = ?`);
       values.push(value);
     }
   });
 
-  if (fields.length === 0) {
-    return false;
-  }
+  if (fields.length === 0) return false;
 
   values.push(id);
   await pool.execute(

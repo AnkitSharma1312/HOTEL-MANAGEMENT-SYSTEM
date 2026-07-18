@@ -3,19 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Grand Luxe Hotel — Luxury at Its Finest</title>
+    <title>The Taj Hotels — Where India Stays</title>
     <meta
       name="description"
-      content="Experience unparalleled luxury at Grand Luxe Hotel. Book your dream stay with world-class amenities and personalized service."
+      content="Experience unparalleled luxury at The Taj Hotels. Book your dream stay with world-class amenities and personalized service."
     />
     <link rel="stylesheet" href="style.css" />
+    <script>if(location.protocol==='file:'){location.replace('http://localhost:3000/index.html');}</script>
   </head>
   <body data-page="landing">
     <!-- ===== NAVBAR ===== -->
     <nav class="navbar transparent" id="navbar">
       <a href="index.html" class="nav-brand">
         <div class="brand-icon">🏨</div>
-        <span class="brand-name">Grand<span>Luxe</span></span>
+        <span class="brand-name">The <span>Taj</span></span>
       </a>
       <ul class="nav-links" id="navLinks">
         <li><a href="#hero" class="active">Home</a></li>
@@ -76,10 +77,9 @@
         </div>
       </div>
       <div class="hero-image" aria-hidden="true">
-        <div class="hero-image-placeholder">
-          <div>🏨</div>
-          <div style="font-size: 1rem; margin-top: 12px">Grand Luxe Hotel</div>
-        </div>
+        <img src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=700&q=85"
+          alt="The Taj Hotels"
+          style="width:100%;height:100%;object-fit:cover;border-radius:var(--radius-xl);box-shadow:0 32px 80px rgba(0,0,0,0.4)">
       </div>
       <div class="scroll-indicator" aria-hidden="true">Scroll</div>
     </section>
@@ -190,7 +190,7 @@
             <h2 class="section-title">Why <span>Choose Us?</span></h2>
             <div class="title-line" style="margin: 12px 0 28px"></div>
             <p style="color: var(--text-mid); margin-bottom: 32px">
-              Grand Luxe Hotel has been setting the gold standard in luxury
+              The Taj Hotels has been setting the gold standard in luxury
               hospitality for over 25 years.
             </p>
             <div class="why-us-features">
@@ -236,13 +236,10 @@
               </div>
             </div>
           </div>
-          <div class="why-us-visual">
-            <div style="text-align: center; color: rgba(255, 255, 255, 0.3)">
-              <div style="font-size: 8rem">🏨</div>
-              <p style="font-size: 1.1rem; margin-top: 10px">
-                Grand Luxe Hotel
-              </p>
-            </div>
+          <div class="why-us-visual" style="overflow:hidden;border-radius:var(--radius-xl);padding:0">
+            <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=700&q=85"
+              alt="The Taj Hotels"
+              style="width:100%;height:100%;min-height:420px;object-fit:cover;display:block">
             <div class="why-us-badge">
               <strong>98%</strong>
               <span>Guest Satisfaction Rate</span>
@@ -279,7 +276,7 @@
           </div>
           <div class="testimonial-card">
             <p class="testimonial-text">
-              Grand Luxe is our go-to for business travel. The executive rooms
+              The Taj is our go-to for business travel. The executive rooms
               are perfectly equipped, concierge is fantastic, and the breakfast
               buffet is world-class.
             </p>
@@ -292,7 +289,7 @@
           </div>
           <div class="testimonial-card">
             <p class="testimonial-text">
-              We held our wedding reception at Grand Luxe and it was the most
+              We held our wedding reception at The Taj and it was the most
               magical night of our lives. The events team is simply phenomenal!
             </p>
             <div class="testimonial-author">
@@ -318,11 +315,26 @@
           </p>
         </div>
         <div class="gallery-grid">
-          <div class="gallery-item">🏨</div>
-          <div class="gallery-item">🛏️</div>
-          <div class="gallery-item">🍽️</div>
-          <div class="gallery-item">🏊</div>
-          <div class="gallery-item">🌿</div>
+          <div class="gallery-item" style="padding:0;overflow:hidden">
+            <img src="https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=600&q=80"
+              alt="Luxury Hotel Lobby" style="width:100%;height:100%;object-fit:cover;transition:transform 0.4s" onmouseover="this.style.transform='scale(1.06)'" onmouseout="this.style.transform='scale(1)'">
+          </div>
+          <div class="gallery-item" style="padding:0;overflow:hidden">
+            <img src="https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600&q=80"
+              alt="Premium Room" style="width:100%;height:100%;object-fit:cover;transition:transform 0.4s" onmouseover="this.style.transform='scale(1.06)'" onmouseout="this.style.transform='scale(1)'">
+          </div>
+          <div class="gallery-item" style="padding:0;overflow:hidden">
+            <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&q=80"
+              alt="Fine Dining" style="width:100%;height:100%;object-fit:cover;transition:transform 0.4s" onmouseover="this.style.transform='scale(1.06)'" onmouseout="this.style.transform='scale(1)'">
+          </div>
+          <div class="gallery-item" style="padding:0;overflow:hidden">
+            <img src="https://images.unsplash.com/photo-1540541338287-41700207dee6?w=600&q=80"
+              alt="Infinity Pool" style="width:100%;height:100%;object-fit:cover;transition:transform 0.4s" onmouseover="this.style.transform='scale(1.06)'" onmouseout="this.style.transform='scale(1)'">
+          </div>
+          <div class="gallery-item" style="padding:0;overflow:hidden">
+            <img src="https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?w=600&q=80"
+              alt="Luxury Spa" style="width:100%;height:100%;object-fit:cover;transition:transform 0.4s" onmouseover="this.style.transform='scale(1.06)'" onmouseout="this.style.transform='scale(1)'">
+          </div>
         </div>
       </div>
     </section>
@@ -343,19 +355,19 @@
               <div class="contact-info-icon">📍</div>
               <div class="contact-info-text">
                 <strong>Address</strong
-                ><span>123 Luxury Avenue, Grand City, GC 10001</span>
+                ><span>Apollo Bunder, Colaba, Mumbai - 400001</span>
               </div>
             </div>
             <div class="contact-info-item">
               <div class="contact-info-icon">📞</div>
               <div class="contact-info-text">
-                <strong>Phone</strong><span>+1 (800) 123-LUXE</span>
+                <strong>Phone</strong><span>+91 22 6665 3366</span>
               </div>
             </div>
             <div class="contact-info-item">
               <div class="contact-info-icon">✉️</div>
               <div class="contact-info-text">
-                <strong>Email</strong><span>reservations@grandluxe.com</span>
+                <strong>Email</strong><span>reservations@tajhotels.com</span>
               </div>
             </div>
             <div class="contact-info-item">
@@ -440,16 +452,15 @@
     </section>
 
     <!-- ===== FOOTER ===== -->
-    <footer class="footer">
-      <div class="container">
+    <footer class="footer">      <div class="container">
         <div class="footer-grid">
           <div class="footer-about">
             <a href="index.html" class="nav-brand"
               ><div class="brand-icon">🏨</div>
-              <span class="brand-name">Grand<span>Luxe</span></span></a
+              <span class="brand-name">The <span>Taj</span></span></a
             >
             <p>
-              Setting the gold standard in luxury hospitality since 1999. Your
+              India's most iconic luxury hospitality brand since 1903. Your
               comfort is our highest priority.
             </p>
             <div class="footer-socials">
@@ -484,11 +495,11 @@
           <div class="footer-col">
             <h4>Contact</h4>
             <ul>
-              <li><a href="#">📍 123 Luxury Ave, Grand City</a></li>
-              <li><a href="tel:+18001235893">📞 +1 (800) 123-LUXE</a></li>
+              <li><a href="#">📍 Apollo Bunder, Colaba, Grand City</a></li>
+              <li><a href="tel:+912266653366">📞 +91 22 6665 3366</a></li>
               <li>
-                <a href="mailto:reservations@grandluxe.com"
-                  >✉️ reservations@grandluxe.com</a
+                <a href="mailto:reservations@tajhotels.com"
+                  >✉️ reservations@tajhotels.com</a
                 >
               </li>
               <li><a href="#">🕐 Check-in: 3:00 PM</a></li>
@@ -498,10 +509,13 @@
       </div>
       <div class="footer-bottom">
         <p>
-          © 2025 Grand Luxe Hotel. All rights reserved. | Designed with ❤️ for
+          © 2025 The Taj Hotels. All rights reserved. | Designed with ❤️ for
           luxury.
         </p>
       </div>
     </footer>
+
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
   </body>
 </html>

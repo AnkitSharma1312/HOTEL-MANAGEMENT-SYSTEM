@@ -3,8 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Rooms — Grand Luxe Hotel</title>
+    <title>Rooms — The Taj Hotels</title>
     <link rel="stylesheet" href="style.css" />
+    <script>if(location.protocol==='file:'){location.replace('http://localhost:3000/rooms.html');}</script>
   </head>
   <body data-page="rooms">
     <div class="app-layout">
@@ -12,7 +13,7 @@
       <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
           <div class="sidebar-logo">🏨</div>
-          <span class="sidebar-brand">Grand<span>Luxe</span></span>
+          <span class="sidebar-brand">The <span>Taj</span></span>
           <span class="sidebar-close" id="sidebarClose">✕</span>
         </div>
         <div class="sidebar-user">
@@ -126,9 +127,10 @@
               ></span>
               <!-- Only visible to admin -->
               <button
-                class="btn btn-primary hidden"
+                class="btn btn-primary"
                 id="addRoomBtn"
                 data-role="admin"
+                style="display:none"
               >
                 + Add Room
               </button>
@@ -160,7 +162,7 @@
                 </select>
               </div>
               <div class="form-group">
-                <label class="form-label">Min Price ($)</label>
+                <label class="form-label">Min Price (₹)</label>
                 <input
                   type="number"
                   id="filterMinPrice"
@@ -170,7 +172,7 @@
                 />
               </div>
               <div class="form-group">
-                <label class="form-label">Max Price ($)</label>
+                <label class="form-label">Max Price (₹)</label>
                 <input
                   type="number"
                   id="filterMaxPrice"
@@ -275,7 +277,7 @@
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label" for="roomModalPrice"
-                  >Price per Night ($) *</label
+                  >Price per Night (₹) *</label
                 >
                 <input
                   type="number"

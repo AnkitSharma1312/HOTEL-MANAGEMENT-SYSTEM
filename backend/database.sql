@@ -1,23 +1,10 @@
-﻿-- ============================================================
---  HIGH-END HOTEL MANAGEMENT SYSTEM — DATABASE SCHEMA
---  Project  : Grand Luxe Hotel Management System
---  Author   : Ankit Sharma
---  Database : hotel_management_db
---  Engine   : MySQL 8.0+
--- ============================================================
-
--- Drop & recreate database
-DROP DATABASE IF EXISTS hotel_management_db;
+﻿DROP DATABASE IF EXISTS hotel_management_db;
 CREATE DATABASE hotel_management_db
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
 USE hotel_management_db;
 
--- ============================================================
--- TABLE 1: users
--- Stores all system users: guests, staff, admins
--- ============================================================
 CREATE TABLE users (
   id               INT UNSIGNED     NOT NULL AUTO_INCREMENT,
   full_name        VARCHAR(100)     NOT NULL,
@@ -42,10 +29,6 @@ CREATE TABLE users (
   AUTO_INCREMENT=1
   COMMENT='All system users: guests, staff, admins';
 
--- ============================================================
--- TABLE 2: room_types
--- Master table for room categories & pricing
--- ============================================================
 CREATE TABLE room_types (
   id               INT UNSIGNED     NOT NULL AUTO_INCREMENT,
   type_name        VARCHAR(60)      NOT NULL,
@@ -60,10 +43,6 @@ CREATE TABLE room_types (
 ) ENGINE=InnoDB
   COMMENT='Room categories with base pricing';
 
--- ============================================================
--- TABLE 3: rooms
--- Individual hotel rooms
--- ============================================================
 CREATE TABLE rooms (
   id               INT UNSIGNED     NOT NULL AUTO_INCREMENT,
   room_number      VARCHAR(10)      NOT NULL,
@@ -98,10 +77,6 @@ CREATE TABLE rooms (
 ) ENGINE=InnoDB
   COMMENT='Individual hotel rooms with amenities and status';
 
--- ============================================================
--- TABLE 4: bookings
--- Room reservations made by guests
--- ============================================================
 CREATE TABLE bookings (
   id               INT UNSIGNED     NOT NULL AUTO_INCREMENT,
   booking_ref      VARCHAR(20)      NOT NULL
@@ -162,10 +137,6 @@ CREATE TABLE bookings (
 ) ENGINE=InnoDB
   COMMENT='Room bookings/reservations by guests';
 
--- ============================================================
--- TABLE 5: payments
--- Payment records linked to bookings
--- ============================================================
 CREATE TABLE payments (
   id               INT UNSIGNED     NOT NULL AUTO_INCREMENT,
   booking_id       INT UNSIGNED     NOT NULL,
@@ -200,10 +171,6 @@ CREATE TABLE payments (
 ) ENGINE=InnoDB
   COMMENT='Payment transactions for bookings';
 
--- ============================================================
--- TABLE 6: staff
--- Staff profile linked to users table
--- ============================================================
 CREATE TABLE staff (
   id                  INT UNSIGNED     NOT NULL AUTO_INCREMENT,
   user_id             INT UNSIGNED     NOT NULL UNIQUE
@@ -244,10 +211,7 @@ CREATE TABLE staff (
 ) ENGINE=InnoDB
   COMMENT='Staff profiles, salary, attendance linked to users';
 
--- ============================================================
--- TABLE 7: salary_payments
--- Track salary disbursement history for staff
--- ============================================================
+
 CREATE TABLE salary_payments (
   id               INT UNSIGNED     NOT NULL AUTO_INCREMENT,
   staff_id         INT UNSIGNED     NOT NULL,
@@ -279,10 +243,7 @@ CREATE TABLE salary_payments (
 ) ENGINE=InnoDB
   COMMENT='Staff salary payment history';
 
--- ============================================================
--- TABLE 8: contact_messages
--- Inquiries from the contact form
--- ============================================================
+
 CREATE TABLE contact_messages (
   id               INT UNSIGNED     NOT NULL AUTO_INCREMENT,
   name             VARCHAR(100)     NOT NULL,
@@ -298,11 +259,6 @@ CREATE TABLE contact_messages (
 ) ENGINE=InnoDB
   COMMENT='Guest contact form submissions';
 
--- ============================================================
--- VIEWS — useful for reporting & dashboard
--- ============================================================
-
--- View: Available rooms with full details
 CREATE OR REPLACE VIEW vw_available_rooms AS
   SELECT
     r.id,
@@ -322,7 +278,6 @@ CREATE OR REPLACE VIEW vw_available_rooms AS
   JOIN room_types rt ON rt.id = r.room_type_id
   WHERE r.status = 'available';
 
--- View: Full booking details with guest & room info
 CREATE OR REPLACE VIEW vw_booking_details AS
   SELECT
     b.id                   AS booking_id,
@@ -353,7 +308,7 @@ CREATE OR REPLACE VIEW vw_booking_details AS
   JOIN rooms r  ON b.room_id = r.id
   JOIN room_types rt ON r.room_type_id = rt.id;
 
--- View: Staff details with user info
+
 CREATE OR REPLACE VIEW vw_staff_details AS
   SELECT
     s.id                   AS staff_id,
@@ -372,9 +327,7 @@ CREATE OR REPLACE VIEW vw_staff_details AS
   FROM staff s
   JOIN users u ON s.user_id = u.id;
 
--- ============================================================
--- SEED DATA — Room Types
--- ============================================================
+
 INSERT INTO room_types (type_name, base_price, max_occupancy, size_sqft, description) VALUES
   ('Standard',          2500.00,  2,  320, 'Comfortable standard room with essential amenities'),
   ('Deluxe',            4500.00,  2,  450, 'Spacious deluxe room with premium furnishings and city view'),
@@ -383,9 +336,7 @@ INSERT INTO room_types (type_name, base_price, max_occupancy, size_sqft, descrip
   ('Presidential Suite',18000.00, 6, 1400, 'Our finest accommodation with private pool and butler service'),
   ('Villa',            25000.00,  8, 2200, 'Private villa with exclusive amenities and dedicated staff');
 
--- ============================================================
--- SEED DATA — Sample Rooms
--- ============================================================
+
 INSERT INTO rooms (room_number, room_type_id, floor, price, status, amenities, bed_type, view_type) VALUES
   ('101', 1, 1, 0, 'available',   JSON_ARRAY('WiFi','AC','TV','Mini Fridge'),           'double', 'Garden View'),
   ('102', 1, 1, 0, 'available',   JSON_ARRAY('WiFi','AC','TV','Mini Fridge'),           'twin',   'Garden View'),
@@ -399,53 +350,9 @@ INSERT INTO rooms (room_number, room_type_id, floor, price, status, amenities, b
   ('501', 5, 5, 0, 'available',   JSON_ARRAY('WiFi','AC','TV','Mini Bar','Jacuzzi','Private Pool','Butler','Lounge'), 'king', 'Panoramic'),
   ('601', 6, 1, 0, 'available',   JSON_ARRAY('WiFi','AC','TV','Full Kitchen','Private Pool','Chef','Butler','Gym'), 'king', 'Beachfront');
 
--- ============================================================
--- SEED DATA — Admin User (password: admin@123)
--- Hash generated with bcrypt rounds=10
--- ============================================================
+
 INSERT INTO users (full_name, email, password_hash, role, phone) VALUES
   ('Admin User',   'admin@grandluxe.com',  '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.', 'admin', '9000000001'),
   ('Staff User',   'staff@grandluxe.com',  '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.', 'staff', '9000000002'),
   ('Guest User',   'guest@grandluxe.com',  '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.', 'guest', '9000000003');
 
--- ============================================================
--- USEFUL QUERIES FOR REFERENCE
--- ============================================================
-
--- 1. Get all available rooms with pricing
--- SELECT * FROM vw_available_rooms ORDER BY effective_price;
-
--- 2. Get all active bookings with guest & room details
--- SELECT * FROM vw_booking_details WHERE booking_status IN ('confirmed','checked_in');
-
--- 3. Check room availability for a date range
--- SELECT r.room_number, rt.type_name, rt.base_price
--- FROM rooms r JOIN room_types rt ON r.room_type_id = rt.id
--- WHERE r.status = 'available'
--- AND r.id NOT IN (
---   SELECT room_id FROM bookings
---   WHERE booking_status NOT IN ('cancelled','checked_out')
---   AND check_in < '2024-12-31' AND check_out > '2024-12-28'
--- );
-
--- 4. Revenue report by month
--- SELECT DATE_FORMAT(payment_date,'%Y-%m') AS month,
---        SUM(amount) AS total_revenue, COUNT(*) AS transactions
--- FROM payments WHERE payment_status = 'completed'
--- GROUP BY month ORDER BY month DESC;
-
--- 5. Staff attendance summary
--- SELECT u.full_name, s.position, s.department, s.salary,
---        s.last_payment_date, s.next_payment_date
--- FROM vw_staff_details s
--- JOIN users u ON s.user_id = u.id
--- WHERE s.is_active = 1;
-
--- 6. Dashboard stats
--- SELECT
---   (SELECT COUNT(*) FROM rooms) AS total_rooms,
---   (SELECT COUNT(*) FROM rooms WHERE status='available') AS available_rooms,
---   (SELECT COUNT(*) FROM rooms WHERE status='occupied') AS occupied_rooms,
---   (SELECT COUNT(*) FROM users WHERE role='guest') AS total_guests,
---   (SELECT COUNT(*) FROM bookings WHERE DATE(created_at)=CURDATE()) AS bookings_today,
---   (SELECT COALESCE(SUM(amount),0) FROM payments WHERE payment_status='completed' AND DATE(payment_date)=CURDATE()) AS revenue_today;

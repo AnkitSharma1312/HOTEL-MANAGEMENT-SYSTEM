@@ -1,9 +1,5 @@
-/* ============================================================
-   Hotel Management System - Master Stylesheet
-   Theme: Luxury Royal Blue + Gold + White | Glassmorphism
-   ============================================================ */
 
-/* ---------- CSS Variables ---------- */
+/*CSS Variables*/
 :root {
   --royal-blue: #1a237e;
   --royal-blue-light: #283593;
@@ -35,7 +31,7 @@
   --font-main: "Segoe UI", system-ui, -apple-system, sans-serif;
 }
 
-/* ---------- Reset & Base ---------- */
+/* Reset & Base */
 *,
 *::before,
 *::after {
@@ -444,11 +440,15 @@ h6 {
     var(--royal-blue) 50%,
     #1565c0 100%
   );
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   align-items: center;
   position: relative;
   overflow: hidden;
   padding-top: var(--header-height);
+  gap: 40px;
+  padding-left: max(40px, calc((100vw - 1200px) / 2));
+  padding-right: max(40px, calc((100vw - 1200px) / 2));
 }
 .hero::before {
   content: "";
@@ -501,7 +501,7 @@ h6 {
 .hero-content {
   position: relative;
   z-index: 2;
-  max-width: 660px;
+  max-width: 600px;
   color: var(--white);
 }
 .hero-badge {
@@ -559,23 +559,20 @@ h6 {
   color: rgba(255, 255, 255, 0.65);
 }
 .hero-image {
-  position: absolute;
-  right: 5%;
-  top: 50%;
-  transform: translateY(-50%);
-  width: min(520px, 45vw);
+  position: relative;
+  width: 100%;
   z-index: 2;
-}
-.hero-image .hero-img-card {
   border-radius: var(--radius-xl);
   overflow: hidden;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
-  border: 2px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.45);
+  border: 3px solid rgba(201, 168, 76, 0.25);
+  max-height: 520px;
 }
-.hero-image .hero-img-card img {
+.hero-image img {
   width: 100%;
-  height: 400px;
+  height: 520px;
   object-fit: cover;
+  display: block;
 }
 .hero-image-placeholder {
   width: 100%;
@@ -3008,5 +3005,249 @@ select.form-control {
   .btn-lg {
     padding: 12px 24px;
     font-size: 0.95rem;
+  }
+}
+
+/* ============================================================
+   MOBILE RESPONSIVE — App Layout (Dashboard, Rooms, Booking)
+   ============================================================ */
+
+/* ── App layout: sidebar + main ── */
+@media (max-width: 900px) {
+  .app-layout {
+    flex-direction: column;
+  }
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 100vh;
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    width: 280px !important;
+  }
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  .main-content {
+    margin-left: 0 !important;
+    width: 100%;
+  }
+  .topbar {
+    padding: 0 16px;
+  }
+  .topbar-search {
+    display: none;
+  }
+}
+
+/* ── Stats grid ── */
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .stat-card {
+    padding: 16px;
+  }
+  .stat-value {
+    font-size: 1.6rem;
+  }
+}
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Dashboard grid ── */
+@media (max-width: 900px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  .dashboard-grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Tables — horizontal scroll on mobile ── */
+@media (max-width: 768px) {
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .data-table {
+    min-width: 560px;
+  }
+  .data-table th,
+  .data-table td {
+    padding: 10px 8px;
+    font-size: 0.82rem;
+  }
+  .actions-cell {
+    white-space: nowrap;
+  }
+}
+
+/* ── Booking layout ── */
+@media (max-width: 900px) {
+  .booking-layout {
+    grid-template-columns: 1fr;
+  }
+  .booking-summary-sticky {
+    position: static !important;
+    order: -1;
+  }
+}
+
+/* ── Room cards ── */
+@media (max-width: 600px) {
+  .rooms-page-grid {
+    grid-template-columns: 1fr;
+  }
+  .room-card-img {
+    height: 180px;
+  }
+}
+
+/* ── Page content padding ── */
+@media (max-width: 768px) {
+  .page-content {
+    padding: 16px;
+  }
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .card-body {
+    padding: 16px;
+  }
+}
+
+/* ── Quick actions ── */
+@media (max-width: 480px) {
+  .quick-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ── Auth pages ── */
+@media (max-width: 480px) {
+  .auth-card {
+    margin: 0 12px;
+    border-radius: var(--radius-lg);
+  }
+  .auth-card-body {
+    padding: 20px 16px;
+  }
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Topbar on mobile ── */
+@media (max-width: 600px) {
+  .topbar-actions .topbar-search { display: none; }
+  .topbar-user span { display: none; }
+  .topbar-title h2 { font-size: 1rem; }
+}
+
+/* ── Hero section ── */
+@media (max-width: 768px) {
+  .hero {
+    grid-template-columns: 1fr;
+    padding: 80px 20px 40px;
+    text-align: center;
+  }
+  .hero-image {
+    display: none;
+  }
+  .hero-actions {
+    justify-content: center;
+  }
+  .hero-stats {
+    justify-content: center;
+    gap: 20px;
+  }
+}
+
+/* ── Modals on mobile ── */
+@media (max-width: 600px) {
+  .modal {
+    width: 95vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    margin: 20px auto;
+  }
+  .modal-lg {
+    width: 95vw;
+  }
+  .modal-body {
+    max-height: 65vh;
+    overflow-y: auto;
+  }
+}
+
+/* ── Navbar on mobile ── */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0 16px;
+  }
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0; right: 0;
+    background: var(--royal-blue-dark);
+    flex-direction: column;
+    padding: 16px;
+    gap: 4px;
+    z-index: 999;
+  }
+  .nav-links.open { display: flex; }
+  .nav-actions.open { display: flex; }
+  .nav-toggle { display: flex; }
+}
+
+/* ── Booking steps on mobile ── */
+@media (max-width: 600px) {
+  .booking-steps {
+    gap: 4px;
+  }
+  .step-label {
+    font-size: 0.72rem;
+  }
+  .step-num {
+    width: 28px;
+    height: 28px;
+    font-size: 0.85rem;
+  }
+}
+
+/* ── Payment methods grid ── */
+@media (max-width: 480px) {
+  #pmCash ~ span,
+  #pmCard ~ span,
+  #pmUpi ~ span,
+  #pmNetBanking ~ span {
+    font-size: 0.85rem;
+  }
+}
+
+/* ── Contact page ── */
+@media (max-width: 768px) {
+  .contact-page-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── About page ── */
+@media (max-width: 768px) {
+  .why-us-grid {
+    grid-template-columns: 1fr;
+  }
+  .why-us-visual {
+    display: none;
   }
 }

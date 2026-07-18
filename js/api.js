@@ -1,4 +1,5 @@
-const API_BASE = "https://localhost:5000/api";
+// Works whether opened as file:// or http://localhost:3000
+const API_BASE = "http://localhost:5000/api";
 /*  Core HTTP helper */
 /**
  * Central fetch wrapper.
@@ -30,7 +31,7 @@ async function request(endpoint, options = {}) {
     // Handle 401 – token expired or invalid
     if (res.status === 401) {
       Auth.logout();
-      window.location.href = "/login.html";
+      window.location.href = "login.html";
       return;
     }
 
@@ -199,6 +200,21 @@ const UsersAPI = {
   /** Create staff member (Admin) */
   createStaff: (data) =>
     request("/users/staff", { method: "POST", body: data }),
+
+  /** Get all staff with profiles */
+  getStaffProfiles: () => request("/users/staff-profiles"),
+
+  /** Update staff profile (position/salary) */
+  updateStaffProfile: (userId, data) =>
+    request(`/users/staff-profiles/${userId}`, { method: "PUT", body: data }),
+
+  /** Pay staff salary */
+  paySalary: (userId, data) =>
+    request(`/users/staff-profiles/${userId}/pay`, { method: "POST", body: data }),
+
+  /** Get salary payment history */
+  getSalaryHistory: (userId) =>
+    request(`/users/staff-profiles/${userId}/payments`),
 };
 
 /*  REPORTS / ANALYTICS API (Admin)                                    */

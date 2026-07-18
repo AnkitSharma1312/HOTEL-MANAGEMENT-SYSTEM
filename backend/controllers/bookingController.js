@@ -21,10 +21,41 @@ const createBooking = async (req, res, next) => {
       checkOut,
       check_out_date,
       guests = 1,
+      guestId,
+      guestEmail,
+      paymentMethod = "cash",
+      services = [],
+      servicesTotal = 0,
+      specialRequests = "",
     } = req.body;
-    const resolvedRoomId = roomId ?? room_id;
-    const resolvedCheckIn = checkIn ?? check_in_date;
+
+    const resolvedRoomId   = roomId   ?? room_id;
+    const resolvedCheckIn  = checkIn  ?? check_in_date;
     const resolvedCheckOut = checkOut ?? check_out_date;
+
+    // ── Resolve guest ID ──────────────────────────────────
+    // admin/staff can book FOR a guest by passing guestId or guestEmail
+    let resolvedGuestId = req.user.id;
+
+    if (req.user.role === "admin" || req.user.role === "staff") {
+      if (guestId) {
+        const [guestRows] = await pool.query(
+          "SELECT id, full_name FROM users WHERE id = ?", [guestId]
+        );
+        if (!guestRows[0]) {
+          return res.status(404).json({ success: false, message: `Guest with id ${guestId} not found` });
+        }
+        resolvedGuestId = guestRows[0].id;
+      } else if (guestEmail) {
+        const [guestRows] = await pool.query(
+          "SELECT id, full_name FROM users WHERE email = ?", [guestEmail.toLowerCase().trim()]
+        );
+        if (!guestRows[0]) {
+          return res.status(404).json({ success: false, message: `No user found with email: ${guestEmail}` });
+        }
+        resolvedGuestId = guestRows[0].id;
+      }
+    }
     const room = await getRoomById(resolvedRoomId);
 
     if (!room) {
@@ -75,32 +106,59 @@ const createBooking = async (req, res, next) => {
       1,
       Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)),
     );
-    const totalAmount =
-      Number(room.price || room.price_per_night || 0) * nights;
+    const roomAmount    = Number(room.price || room.price_per_night || 0) * nights;
+    const addServices   = Number(servicesTotal) || 0;
+    const tax           = (roomAmount + addServices) * 0.12;
+    const totalAmount   = roomAmount + addServices + tax;
+
     const bookingId = await createBookingModel({
-      user_id: req.user.id,
-      room_id: resolvedRoomId,
-      check_in_date: resolvedCheckIn,
-      check_out_date: resolvedCheckOut,
+      user_id        : resolvedGuestId,
+      room_id        : resolvedRoomId,
+      check_in_date  : resolvedCheckIn,
+      check_out_date : resolvedCheckOut,
       guests,
-      total_amount: totalAmount,
-      status: "confirmed",
+      total_amount   : Math.round(totalAmount * 100) / 100,
+      services       : services || [],
+      services_total : addServices,
+      special_requests: specialRequests || "",
+      status         : "confirmed",
     });
 
     await createPayment({
-      booking_id: bookingId,
-      amount: totalAmount,
-      payment_method: "cash",
-      status: "paid",
-      transaction_id: `TXN-${bookingId}`,
+      booking_id    : bookingId,
+      amount        : Math.round(totalAmount * 100) / 100,
+      payment_method: ["cash","card","upi","net_banking","wallet"].includes(paymentMethod)
+                        ? paymentMethod : "cash",
+      status        : "paid",
+      transaction_id: `TXN-${Date.now()}-${bookingId}`,
     });
+
     await updateRoomStatus(resolvedRoomId, "reserved");
 
+    // Fetch guest name to return
+    const [guestRow] = await pool.query(
+      "SELECT full_name FROM users WHERE id = ?", [resolvedGuestId]
+    );
+
     res.status(201).json({
-      success: true,
-      message: "Booking created successfully",
-      data: { bookingId, totalAmount, nights },
-      booking: { id: bookingId, totalAmount, nights },
+      success : true,
+      message : "Booking created successfully",
+      data    : {
+        bookingId,
+        totalAmount   : Math.round(totalAmount * 100) / 100,
+        roomAmount,
+        servicesTotal : addServices,
+        tax           : Math.round(tax * 100) / 100,
+        nights,
+        guestName     : guestRow[0]?.full_name || "Guest",
+        paymentMethod,
+      },
+      booking : {
+        id          : bookingId,
+        totalAmount : Math.round(totalAmount * 100) / 100,
+        nights,
+        guestName   : guestRow[0]?.full_name || "Guest",
+      },
     });
   } catch (error) {
     next(error);
@@ -130,7 +188,8 @@ const getBookingById = async (req, res, next) => {
         .json({ success: false, message: "Booking not found" });
     }
 
-    if (req.user.role !== "admin" && booking.guest_id !== req.user.id) {
+    if (req.user.role !== "admin" && req.user.role !== "staff" && 
+        Number(booking.guestId || booking.guest_id) !== Number(req.user.id)) {
       return res.status(403).json({ success: false, message: "Access denied" });
     }
 
@@ -149,20 +208,24 @@ const updateBooking = async (req, res, next) => {
   try {
     const booking = await getBookingByIdModel(req.params.id);
     if (!booking) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Booking not found" });
+      return res.status(404).json({ success: false, message: "Booking not found" });
     }
 
     const updated = await updateBookingModel(req.params.id, req.body);
     if (!updated) {
-      return res
-        .status(400)
-        .json({ success: false, message: "No valid fields provided" });
+      return res.status(400).json({ success: false, message: "No valid fields provided" });
     }
 
-    if (req.body.booking_status === "checked_out") {
-      await updateRoomStatus(booking.room_id, "available");
+    // room_id comes back as roomId from the JOIN query
+    const roomId = booking.roomId || booking.room_id;
+    if (req.body.booking_status === "checked_out" && roomId) {
+      await updateRoomStatus(roomId, "available");
+    }
+    if (req.body.booking_status === "checked_in" && roomId) {
+      await updateRoomStatus(roomId, "occupied");
+    }
+    if (req.body.booking_status === "cancelled" && roomId) {
+      await updateRoomStatus(roomId, "available");
     }
 
     res.status(200).json({
