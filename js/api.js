@@ -1,5 +1,5 @@
 // Works whether opened as file:// or http://localhost:3000
-const API_BASE = "https://hotel-management-system-qtss.onrender.com/api";
+const API_BASE = "https://hotel-management-system-qtss.onrender.com";
 /*  Core HTTP helper */
 /**
  * Central fetch wrapper.
