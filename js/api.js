@@ -1,5 +1,5 @@
 // Works whether opened as file:// or http://localhost:3000
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = "https://hotel-management-system-qtss.onrender.com/";
 /*  Core HTTP helper */
 /**
  * Central fetch wrapper.
@@ -210,7 +210,10 @@ const UsersAPI = {
 
   /** Pay staff salary */
   paySalary: (userId, data) =>
-    request(`/users/staff-profiles/${userId}/pay`, { method: "POST", body: data }),
+    request(`/users/staff-profiles/${userId}/pay`, {
+      method: "POST",
+      body: data,
+    }),
 
   /** Get salary payment history */
   getSalaryHistory: (userId) =>
