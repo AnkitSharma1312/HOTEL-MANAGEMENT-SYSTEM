@@ -11,8 +11,8 @@
 
 "use strict";
 
-const { pool }  = require("../config/db");
-const bcrypt    = require("bcrypt");
+const { pool } = require("../config/db");
+const bcrypt = require("bcrypt");
 
 const BCRYPT_ROUNDS = 10;
 
@@ -28,16 +28,17 @@ const createUser = async ({
   fullName,
   email,
   password,
-  role  = "guest",
+  role = "guest",
   phone = "",
 }) => {
   const displayName = fullName || name || "Guest";
 
   // If password is already hashed by controller, store as-is
   // If plain text, hash it here (fallback safety)
-  const storedPassword = password.startsWith("$2b$") || password.startsWith("$2a$")
-    ? password
-    : await bcrypt.hash(password, BCRYPT_ROUNDS);
+  const storedPassword =
+    password.startsWith("$2b$") || password.startsWith("$2a$")
+      ? password
+      : await bcrypt.hash(password, BCRYPT_ROUNDS);
 
   const [result] = await pool.execute(
     `INSERT INTO users
@@ -47,9 +48,9 @@ const createUser = async ({
       displayName,
       email.toLowerCase().trim(),
       storedPassword,
-      ["guest","staff","admin"].includes(role) ? role : "guest",
+      ["guest", "staff", "admin"].includes(role) ? role : "guest",
       phone || "",
-    ]
+    ],
   );
 
   return result.insertId;
@@ -74,7 +75,7 @@ const findByEmail = async (email) => {
      FROM users
      WHERE email = ?
      LIMIT 1`,
-    [email.toLowerCase().trim()]
+    [email.toLowerCase().trim()],
   );
   return rows[0];
 };
@@ -82,26 +83,23 @@ const findByEmail = async (email) => {
 // =============================================================
 //  FIND BY ID
 //  Returns user WITHOUT password hash (safe for sending to client)
-// =============================================================
+// =========================================================={
 const findById = async (id) => {
   const [rows] = await pool.execute(
     `SELECT
-       u.id,
-       u.full_name  AS name,
-       u.email,
-       u.role,
-       u.phone,
-       1            AS is_active,
-       u.created_at AS createdAt,
-       COALESCE(sp.position,   'Staff')      AS position,
-       COALESCE(sp.department, 'Front Desk') AS department,
-       COALESCE(sp.salary,     0)            AS salary
-     FROM users u
-     LEFT JOIN staff_profiles sp ON sp.user_id = u.id
-     WHERE u.id = ?
-     LIMIT 1`,
-    [id]
+      id,
+      full_name AS name,
+      email,
+      role,
+      phone,
+      is_active,
+      created_at AS createdAt
+    FROM users
+    WHERE id = ?
+    LIMIT 1`,
+    [id],
   );
+
   return rows[0];
 };
 
@@ -112,12 +110,12 @@ const findById = async (id) => {
 const updateProfile = async (id, data) => {
   // Map frontend field names to DB column names
   const FIELD_MAP = {
-    name      : "full_name",
-    fullName  : "full_name",
-    full_name : "full_name",
-    email     : "email",
-    phone     : "phone",
-    address   : "address",
+    name: "full_name",
+    fullName: "full_name",
+    full_name: "full_name",
+    email: "email",
+    phone: "phone",
+    address: "address",
   };
 
   const fields = [];
@@ -135,7 +133,7 @@ const updateProfile = async (id, data) => {
   values.push(id);
   await pool.execute(
     `UPDATE users SET ${fields.join(", ")} WHERE id = ?`,
-    values
+    values,
   );
   return true;
 };
@@ -146,10 +144,10 @@ const updateProfile = async (id, data) => {
 // =============================================================
 const updatePassword = async (id, newPlainPassword) => {
   const hashedPassword = await bcrypt.hash(newPlainPassword, BCRYPT_ROUNDS);
-  await pool.execute(
-    "UPDATE users SET password = ? WHERE id = ?",
-    [hashedPassword, id]
-  );
+  await pool.execute("UPDATE users SET password = ? WHERE id = ?", [
+    hashedPassword,
+    id,
+  ]);
 };
 
 // =============================================================
