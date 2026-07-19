@@ -21,7 +21,7 @@
 
 "use strict";
 
-const jwt    = require("jsonwebtoken");
+const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const {
   createUser,
@@ -34,13 +34,13 @@ const {
 // ─────────────────────────────────────────────────────────────
 //  CONSTANTS
 // ─────────────────────────────────────────────────────────────
-const BCRYPT_ROUNDS  = 10;
-const TOKEN_EXPIRY   = "7d";
+const BCRYPT_ROUNDS = 10;
+const TOKEN_EXPIRY = "7d";
 const COOKIE_OPTIONS = {
-  httpOnly : true,   // JS cannot read this cookie (XSS protection)
-  sameSite : "lax",  // CSRF protection
-  maxAge   : 7 * 24 * 60 * 60 * 1000, // 7 days in ms
-  secure   : process.env.NODE_ENV === "production", // HTTPS only in prod
+  httpOnly: true, // JS cannot read this cookie (XSS protection)
+  sameSite: "lax", // CSRF protection
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
+  secure: process.env.NODE_ENV === "production", // HTTPS only in prod
 };
 
 // ─────────────────────────────────────────────────────────────
@@ -53,12 +53,12 @@ const createToken = (user) => {
   }
   return jwt.sign(
     {
-      id   : user.id,
-      role : user.role,
+      id: user.id,
+      role: user.role,
       email: user.email,
     },
     process.env.JWT_SECRET,
-    { expiresIn: TOKEN_EXPIRY, algorithm: "HS256" }
+    { expiresIn: TOKEN_EXPIRY, algorithm: "HS256" },
   );
 };
 
@@ -66,14 +66,14 @@ const createToken = (user) => {
 //  HELPER: Safe user object (remove password before sending)
 // ─────────────────────────────────────────────────────────────
 const sanitizeUser = (user) => ({
-  id         : user.id,
-  name       : user.name || user.full_name,
-  email      : user.email,
-  role       : user.role,
-  phone      : user.phone    || null,
-  position   : user.position   || null,
-  department : user.department || null,
-  createdAt  : user.createdAt || user.created_at || null,
+  id: user.id,
+  name: user.name || user.full_name,
+  email: user.email,
+  role: user.role,
+  phone: user.phone || null,
+  position: user.position || null,
+  department: user.department || null,
+  createdAt: user.createdAt || user.created_at || null,
 });
 
 // ─────────────────────────────────────────────────────────────
@@ -86,8 +86,13 @@ const isDuplicateEntryError = (error) =>
 //  HELPER: Detect DB connection error
 // ─────────────────────────────────────────────────────────────
 const isDBConnectionError = (error) =>
-  ["ECONNREFUSED", "ENOTFOUND", "PROTOCOL_CONNECTION_LOST",
-   "ER_ACCESS_DENIED_ERROR", "ECONNRESET"].includes(error.code);
+  [
+    "ECONNREFUSED",
+    "ENOTFOUND",
+    "PROTOCOL_CONNECTION_LOST",
+    "ER_ACCESS_DENIED_ERROR",
+    "ECONNRESET",
+  ].includes(error.code);
 
 // =============================================================
 //  REGISTER
@@ -128,10 +133,10 @@ const register = async (req, res, next) => {
     // ── 2. Validate required fields ─────────────────────────
     if (!email || !password) {
       return res.status(400).json({
-        success : false,
-        message : "Email and password are required",
-        errors  : [
-          !email    && { field: "email",    message: "Email is required" },
+        success: false,
+        message: "Email and password are required",
+        errors: [
+          !email && { field: "email", message: "Email is required" },
           !password && { field: "password", message: "Password is required" },
         ].filter(Boolean),
       });
@@ -139,8 +144,8 @@ const register = async (req, res, next) => {
 
     if (password.length < 6) {
       return res.status(400).json({
-        success : false,
-        message : "Password must be at least 6 characters long",
+        success: false,
+        message: "Password must be at least 6 characters long",
       });
     }
 
@@ -148,8 +153,8 @@ const register = async (req, res, next) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({
-        success : false,
-        message : "Please provide a valid email address",
+        success: false,
+        message: "Please provide a valid email address",
       });
     }
 
@@ -161,8 +166,8 @@ const register = async (req, res, next) => {
       // DB connection failed during lookup
       if (isDBConnectionError(dbError)) {
         return res.status(503).json({
-          success : false,
-          message : "Database connection failed. Please try again later.",
+          success: false,
+          message: "Database connection failed. Please try again later.",
         });
       }
       throw dbError; // re-throw unexpected errors
@@ -170,9 +175,10 @@ const register = async (req, res, next) => {
 
     if (existingUser) {
       return res.status(409).json({
-        success : false,
-        message : "An account with this email already exists. Please login or use a different email.",
-        field   : "email",
+        success: false,
+        message:
+          "An account with this email already exists. Please login or use a different email.",
+        field: "email",
       });
     }
 
@@ -185,27 +191,27 @@ const register = async (req, res, next) => {
     let userId;
     try {
       userId = await createUser({
-        name    : displayName,
+        name: displayName,
         fullName: displayName,
-        email   : email.toLowerCase().trim(),
+        email: email.toLowerCase().trim(),
         password: hashedPassword, // already hashed
-        role    : ["guest", "staff", "admin"].includes(role) ? role : "guest",
-        phone   : phone || "",
+        role: ["guest", "staff", "admin"].includes(role) ? role : "guest",
+        phone: phone || "",
       });
     } catch (dbError) {
       // Handle MySQL duplicate email error (race condition edge case)
       if (isDuplicateEntryError(dbError)) {
         return res.status(409).json({
-          success : false,
-          message : "An account with this email already exists.",
-          field   : "email",
+          success: false,
+          message: "An account with this email already exists.",
+          field: "email",
         });
       }
       // DB connection error
       if (isDBConnectionError(dbError)) {
         return res.status(503).json({
-          success : false,
-          message : "Database connection failed. Please try again later.",
+          success: false,
+          message: "Database connection failed. Please try again later.",
         });
       }
       throw dbError;
@@ -215,8 +221,9 @@ const register = async (req, res, next) => {
     const newUser = await findById(userId);
     if (!newUser) {
       return res.status(500).json({
-        success : false,
-        message : "Account created but could not fetch user details. Please login.",
+        success: false,
+        message:
+          "Account created but could not fetch user details. Please login.",
       });
     }
 
@@ -228,17 +235,16 @@ const register = async (req, res, next) => {
 
     // ── 9. Send success response ─────────────────────────────
     return res.status(201).json({
-      success : true,
-      message : "Registration successful! Welcome to Grand Luxe Hotel.",
-      data    : {
-        user : sanitizeUser(newUser),
+      success: true,
+      message: "Registration successful! Welcome to taj Hotel.",
+      data: {
+        user: sanitizeUser(newUser),
         token,
       },
       // Also at top-level for backward compatibility with frontend
-      user  : sanitizeUser(newUser),
+      user: sanitizeUser(newUser),
       token,
     });
-
   } catch (error) {
     // Pass to global error handler in server.js
     next(error);
@@ -264,8 +270,8 @@ const login = async (req, res, next) => {
     // ── 1. Validate input ────────────────────────────────────
     if (!email || !password) {
       return res.status(400).json({
-        success : false,
-        message : "Email and password are required",
+        success: false,
+        message: "Email and password are required",
       });
     }
 
@@ -276,8 +282,8 @@ const login = async (req, res, next) => {
     } catch (dbError) {
       if (isDBConnectionError(dbError)) {
         return res.status(503).json({
-          success : false,
-          message : "Database connection failed. Please try again later.",
+          success: false,
+          message: "Database connection failed. Please try again later.",
         });
       }
       throw dbError;
@@ -285,23 +291,28 @@ const login = async (req, res, next) => {
 
     // Use same generic message for both "not found" AND "wrong password"
     // This prevents email enumeration attacks
-    const INVALID_CREDENTIALS_MSG = "Invalid email or password. Please try again.";
+    const INVALID_CREDENTIALS_MSG =
+      "Invalid email or password. Please try again.";
 
     if (!user) {
       return res.status(401).json({
-        success : false,
-        message : INVALID_CREDENTIALS_MSG,
+        success: false,
+        message: INVALID_CREDENTIALS_MSG,
       });
     }
 
     // ── 3. Verify password with bcrypt.compare() ─────────────
     // bcrypt.compare() timing is constant — not vulnerable to timing attacks
+    console.log("input password from request body:", password);
+    console.log("user object from database:", user);
+    console.log("type of user.password:", typeof user.password);
     const isPasswordValid = await bcrypt.compare(password, user.password);
+    console.log("isPasswordValid?", isPasswordValid);
 
     if (!isPasswordValid) {
       return res.status(401).json({
-        success : false,
-        message : INVALID_CREDENTIALS_MSG,
+        success: false,
+        message: INVALID_CREDENTIALS_MSG,
       });
     }
 
@@ -309,8 +320,8 @@ const login = async (req, res, next) => {
     // (is_active field in users table)
     if (user.is_active === 0) {
       return res.status(403).json({
-        success : false,
-        message : "Your account has been deactivated. Please contact support.",
+        success: false,
+        message: "Your account has been deactivated. Please contact support.",
       });
     }
 
@@ -325,14 +336,13 @@ const login = async (req, res, next) => {
 
     // ── 8. Send success response ─────────────────────────────
     return res.status(200).json({
-      success : true,
-      message : `Welcome back, ${safeUser.name}!`,
-      data    : { user: safeUser, token },
+      success: true,
+      message: `Welcome back, ${safeUser.name}!`,
+      data: { user: safeUser, token },
       // Also at top-level for frontend compatibility
-      user    : safeUser,
+      user: safeUser,
       token,
     });
-
   } catch (error) {
     next(error);
   }
@@ -348,8 +358,8 @@ const profile = async (req, res, next) => {
     // req.user is set by auth middleware (middleware/auth.js)
     if (!req.user) {
       return res.status(401).json({
-        success : false,
-        message : "Authentication required",
+        success: false,
+        message: "Authentication required",
       });
     }
 
@@ -357,16 +367,16 @@ const profile = async (req, res, next) => {
     const freshUser = await findById(req.user.id);
     if (!freshUser) {
       return res.status(404).json({
-        success : false,
-        message : "User account not found. It may have been deleted.",
+        success: false,
+        message: "User account not found. It may have been deleted.",
       });
     }
 
     return res.status(200).json({
-      success : true,
-      message : "Profile fetched successfully",
-      data    : { user: sanitizeUser(freshUser) },
-      user    : sanitizeUser(freshUser),
+      success: true,
+      message: "Profile fetched successfully",
+      data: { user: sanitizeUser(freshUser) },
+      user: sanitizeUser(freshUser),
     });
   } catch (error) {
     next(error);
@@ -382,15 +392,15 @@ const logout = async (req, res, next) => {
   try {
     // Clear the httpOnly cookie
     res.clearCookie("token", {
-      httpOnly : true,
-      sameSite : "lax",
-      secure   : process.env.NODE_ENV === "production",
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
     });
 
     return res.status(200).json({
-      success : true,
-      message : "Logged out successfully. See you next time!",
-      data    : {},
+      success: true,
+      message: "Logged out successfully. See you next time!",
+      data: {},
     });
   } catch (error) {
     next(error);
@@ -411,22 +421,22 @@ const changePassword = async (req, res, next) => {
     // ── 1. Validate input ────────────────────────────────────
     if (!currentPassword || !newPassword) {
       return res.status(400).json({
-        success : false,
-        message : "Current password and new password are both required",
+        success: false,
+        message: "Current password and new password are both required",
       });
     }
 
     if (newPassword.length < 6) {
       return res.status(400).json({
-        success : false,
-        message : "New password must be at least 6 characters long",
+        success: false,
+        message: "New password must be at least 6 characters long",
       });
     }
 
     if (currentPassword === newPassword) {
       return res.status(400).json({
-        success : false,
-        message : "New password must be different from current password",
+        success: false,
+        message: "New password must be different from current password",
       });
     }
 
@@ -434,22 +444,22 @@ const changePassword = async (req, res, next) => {
     const user = await findByEmail(req.user.email);
     if (!user) {
       return res.status(404).json({
-        success : false,
-        message : "User account not found",
+        success: false,
+        message: "User account not found",
       });
     }
 
     // ── 3. Verify current password ───────────────────────────
     const isCurrentPasswordValid = await bcrypt.compare(
       currentPassword,
-      user.password
+      user.password,
     );
 
     if (!isCurrentPasswordValid) {
       return res.status(401).json({
-        success : false,
-        message : "Current password is incorrect",
-        field   : "currentPassword",
+        success: false,
+        message: "Current password is incorrect",
+        field: "currentPassword",
       });
     }
 
@@ -458,15 +468,16 @@ const changePassword = async (req, res, next) => {
 
     // ── 5. Clear cookie (force re-login for security) ────────
     res.clearCookie("token", {
-      httpOnly : true,
-      sameSite : "lax",
-      secure   : process.env.NODE_ENV === "production",
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
     });
 
     return res.status(200).json({
-      success : true,
-      message : "Password updated successfully. Please login again with your new password.",
-      data    : {},
+      success: true,
+      message:
+        "Password updated successfully. Please login again with your new password.",
+      data: {},
     });
   } catch (error) {
     next(error);
