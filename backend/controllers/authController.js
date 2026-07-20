@@ -18,8 +18,8 @@
  *    - DB errors handled separately from validation errors
  * =============================================================
  */
-
-"use strict";
+console.log("AUTH CONTROLLER LOADED");
+("use strict");
 
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
@@ -109,7 +109,9 @@ const isDBConnectionError = (error) =>
 //    5. Generate JWT token
 //    6. Return user + token
 // =============================================================
-const register = async (req, res, next) => {
+const register = async (req, res, next) => console.log("REGISTER FUNCTION HIT");
+console.log(req.body);
+{
   try {
     // ── 1. Extract fields (support multiple name formats) ───
     const {
@@ -118,7 +120,7 @@ const register = async (req, res, next) => {
       firstName,
       lastName,
       email,
-      hash_password,
+      password,
       phone,
       role = "guest", // guests self-register; admin sets staff role
     } = req.body;
@@ -131,13 +133,13 @@ const register = async (req, res, next) => {
       "Guest";
 
     // ── 2. Validate required fields ─────────────────────────
-    if (!email || !hash_password) {
+    if (!email || !password) {
       return res.status(400).json({
         success: false,
         message: "Email and password are required",
         errors: [
           !email && { field: "email", message: "Email is required" },
-          !hash_password && {
+          !password && {
             field: "password",
             message: "Password is required",
           },
@@ -252,7 +254,7 @@ const register = async (req, res, next) => {
     // Pass to global error handler in server.js
     next(error);
   }
-};
+}
 
 // =============================================================
 //  LOGIN
@@ -268,7 +270,7 @@ const register = async (req, res, next) => {
 // =============================================================
 const login = async (req, res, next) => {
   try {
-    const { email, hash_password } = req.body;
+    const { email, password } = req.body;
 
     // ── 1. Validate input ────────────────────────────────────
     if (!email || !password) {

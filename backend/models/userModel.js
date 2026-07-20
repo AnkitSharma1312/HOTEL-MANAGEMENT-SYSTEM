@@ -67,7 +67,7 @@ const findByEmail = async (email) => {
        id,
        full_name  AS name,
        email,
-       password,
+       password_hash AS password,
        role,
        phone,
        1          AS is_active,
@@ -144,7 +144,7 @@ const updateProfile = async (id, data) => {
 // =============================================================
 const updatePassword = async (id, newPlainPassword) => {
   const hashedPassword = await bcrypt.hash(newPlainPassword, BCRYPT_ROUNDS);
-  await pool.execute("UPDATE users SET password = ? WHERE id = ?", [
+  await pool.execute("UPDATE users SET password_hash = ? WHERE id = ?", [
     hashedPassword,
     id,
   ]);

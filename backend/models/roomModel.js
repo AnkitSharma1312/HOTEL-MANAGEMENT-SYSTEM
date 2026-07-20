@@ -149,7 +149,7 @@ const updateRoom = async (id, data) => {
     // If capacity is being changed, update on the linked room_type
     if (data.capacity !== undefined) {
       await conn.execute(
-        "UPDATE room_types rt JOIN rooms r ON r.room_type_id = rt.id SET rt.capacity = ? WHERE r.id = ?",
+        "UPDATE room_types rt JOIN rooms r ON r.room_type_id = rt.id SET rt.max_occupancy = ? WHERE r.id = ?",
         [data.capacity, id],
       );
     }
