@@ -18,7 +18,7 @@ const ensureRoomType = async (conn, type) => {
   if (rows[0]) return rows[0].id;
 
   const [result] = await conn.execute(
-    "INSERT INTO room_types (type_name, price_per_night, capacity, description) VALUES (?, ?, ?, ?)",
+    "INSERT INTO room_types (type_name, base_price, capacity, description) VALUES (?, ?, ?, ?)",
     [normalizedType, 2000, 2, `${normalizedType} room`],
   );
   return result.insertId;
@@ -28,8 +28,7 @@ const createRoom = async ({
   name,
   roomNumber,
   type,
-  price_per_night,
-  price,
+  base_price,
   capacity,
   description,
   image_url,
@@ -52,7 +51,7 @@ const createRoom = async ({
 const getAllRooms = async (filters = {}) => {
   let query = `
     SELECT r.id, r.room_number AS roomNumber, r.room_number AS name,
-           rt.type_name AS type, rt.price_per_night AS price,
+           rt.type_name AS type, rt.base_price AS price,
            rt.capacity, rt.description, r.room_status AS status,
            r.created_at AS createdAt
     FROM rooms r
@@ -85,12 +84,12 @@ const getAllRooms = async (filters = {}) => {
   }
 
   if (filters.minPrice) {
-    query += " AND rt.price_per_night >= ?";
+    query += " AND rt.price >= ?";
     params.push(parseFloat(filters.minPrice));
   }
 
   if (filters.maxPrice) {
-    query += " AND rt.price_per_night <= ?";
+    query += " AND rt.price <= ?";
     params.push(parseFloat(filters.maxPrice));
   }
 
@@ -99,7 +98,7 @@ const getAllRooms = async (filters = {}) => {
   // mysql2 pool.execute() LIMIT/OFFSET placeholders support nahi karta
   // dynamic queries mein, isliye directly embed karo (parseInt se safe hai)
   const limitVal = filters.limit ? parseInt(filters.limit, 10) : null;
-  const pageVal  = filters.page  ? parseInt(filters.page,  10) : 1;
+  const pageVal = filters.page ? parseInt(filters.page, 10) : 1;
 
   if (limitVal && limitVal > 0) {
     const offset = pageVal > 1 ? (pageVal - 1) * limitVal : 0;
@@ -115,7 +114,7 @@ const getAllRooms = async (filters = {}) => {
 const getRoomById = async (id) => {
   const [rows] = await pool.execute(
     `SELECT r.id, r.room_number AS roomNumber, r.room_number AS name,
-            rt.type_name AS type, rt.price_per_night AS price,
+            rt.type_name AS type, rt.base_price AS price,
             rt.capacity, rt.description, r.room_status AS status,
             r.created_at AS createdAt
      FROM rooms r
@@ -139,10 +138,10 @@ const updateRoom = async (id, data) => {
     }
 
     // If price is being changed, update price_per_night on the linked room_type
-    if (data.price !== undefined || data.price_per_night !== undefined) {
-      const newPrice = data.price ?? data.price_per_night;
+    if (data.price !== undefined || data.price !== undefined) {
+      const newPrice = data.price ?? data.price;
       await conn.execute(
-        "UPDATE room_types rt JOIN rooms r ON r.room_type_id = rt.id SET rt.price_per_night = ? WHERE r.id = ?",
+        "UPDATE room_types rt JOIN rooms r ON r.room_type_id = rt.id SET rt.base_price = ? WHERE r.id = ?",
         [newPrice, id],
       );
     }
