@@ -118,7 +118,7 @@ const register = async (req, res, next) => {
       firstName,
       lastName,
       email,
-      password,
+      hash_password,
       phone,
       role = "guest", // guests self-register; admin sets staff role
     } = req.body;
@@ -131,13 +131,16 @@ const register = async (req, res, next) => {
       "Guest";
 
     // ── 2. Validate required fields ─────────────────────────
-    if (!email || !password) {
+    if (!email || !hash_password) {
       return res.status(400).json({
         success: false,
         message: "Email and password are required",
         errors: [
           !email && { field: "email", message: "Email is required" },
-          !password && { field: "password", message: "Password is required" },
+          !hash_password && {
+            field: "password",
+            message: "Password is required",
+          },
         ].filter(Boolean),
       });
     }
@@ -265,7 +268,7 @@ const register = async (req, res, next) => {
 // =============================================================
 const login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email, hash_password } = req.body;
 
     // ── 1. Validate input ────────────────────────────────────
     if (!email || !password) {
