@@ -18,7 +18,7 @@ const ensureRoomType = async (conn, type) => {
   if (rows[0]) return rows[0].id;
 
   const [result] = await conn.execute(
-    "INSERT INTO room_types (type_name, base_price, capacity, description) VALUES (?, ?, ?, ?)",
+    "INSERT INTO room_types (type_name, base_price, max_occupancy, description) VALUES (?, ?, ?, ?)",
     [normalizedType, 2000, 2, `${normalizedType} room`],
   );
   return result.insertId;
@@ -29,7 +29,7 @@ const createRoom = async ({
   roomNumber,
   type,
   base_price,
-  capacity,
+  max_occupancy,
   description,
   image_url,
   status = "available",
@@ -39,7 +39,7 @@ const createRoom = async ({
     const roomTypeId = await ensureRoomType(conn, type);
     const roomName = roomNumber || name || `R${Date.now()}`;
     const [result] = await conn.execute(
-      "INSERT INTO rooms (room_number, room_type_id, floor, room_status) VALUES (?, ?, ?, ?)",
+      "INSERT INTO rooms (room_number, room_type_id, floor, status) VALUES (?, ?, ?, ?)",
       [roomName, roomTypeId, 1, status || "available"],
     );
     return result.insertId;
@@ -52,7 +52,7 @@ const getAllRooms = async (filters = {}) => {
   let query = `
     SELECT r.id, r.room_number AS roomNumber, r.room_number AS name,
            rt.type_name AS type, rt.base_price AS price,
-           rt.capacity, rt.description, r.room_status AS status,
+           rt.max_occupancy, rt.description, r.status AS status,
            r.created_at AS createdAt
     FROM rooms r
     JOIN room_types rt ON rt.id = r.room_type_id
@@ -72,19 +72,19 @@ const getAllRooms = async (filters = {}) => {
   }
 
   if (filters.capacity) {
-    query += " AND rt.capacity >= ?";
+    query += " AND rt.max_occupancy >= ?";
     params.push(parseInt(filters.capacity, 10));
   }
 
   if (filters.status) {
     const mappedStatus =
       filters.status === "occupied" ? "occupied" : filters.status;
-    query += " AND r.room_status = ?";
+    query += " AND r.status = ?";
     params.push(mappedStatus);
   }
 
   if (filters.minPrice) {
-    query += " AND rt.price >= ?";
+    query += " AND rt.base_price >= ?";
     params.push(parseFloat(filters.minPrice));
   }
 
@@ -115,7 +115,7 @@ const getRoomById = async (id) => {
   const [rows] = await pool.execute(
     `SELECT r.id, r.room_number AS roomNumber, r.room_number AS name,
             rt.type_name AS type, rt.base_price AS price,
-            rt.capacity, rt.description, r.room_status AS status,
+            rt.max_occupancy, rt.description, r.status AS status,
             r.created_at AS createdAt
      FROM rooms r
      JOIN room_types rt ON rt.id = r.room_type_id
@@ -169,9 +169,9 @@ const updateRoom = async (id, data) => {
       directFields.push("room_number = ?");
       directValues.push(data.roomNumber ?? data.name);
     }
-    if (data.status !== undefined || data.room_status !== undefined) {
-      directFields.push("room_status = ?");
-      directValues.push(data.status ?? data.room_status);
+    if (data.status !== undefined || data.status !== undefined) {
+      directFields.push("status = ?");
+      directValues.push(data.status ?? data.status);
     }
     if (data.floor !== undefined) {
       directFields.push("floor = ?");
@@ -197,10 +197,7 @@ const deleteRoom = async (id) => {
 };
 
 const updateRoomStatus = async (id, status) => {
-  await pool.execute("UPDATE rooms SET room_status = ? WHERE id = ?", [
-    status,
-    id,
-  ]);
+  await pool.execute("UPDATE rooms SET status = ? WHERE id = ?", [status, id]);
 };
 
 module.exports = {
