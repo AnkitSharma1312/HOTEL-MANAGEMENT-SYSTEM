@@ -13,7 +13,7 @@ const createBooking = async ({
   status = "pending",
 }) => {
   const [result] = await pool.execute(
-    "INSERT INTO bookings (guest_id, room_id, check_in, check_out, adults, children, total_amount, booking_status, services, services_total, special_requests) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    "INSERT INTO bookings (user_id, room_id, check_in, check_out, adults, children, total_amount, booking_status, services, services_total, special_requests) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
     [
       user_id,
       room_id,
@@ -33,7 +33,7 @@ const createBooking = async ({
 
 const getBookings = async (userId = null, role = null) => {
   let query = `
-    SELECT b.id, b.guest_id AS guestId, b.room_id AS roomId,
+    SELECT b.id, b.user_id AS user_Id, b.room_id AS roomId,
            b.check_in AS checkIn, b.check_out AS checkOut,
            b.adults, b.children, b.total_amount AS totalAmount,
            b.booking_status AS status, b.created_at AS createdAt,
@@ -41,33 +41,37 @@ const getBookings = async (userId = null, role = null) => {
            b.special_requests AS specialRequests,
            r.room_number AS roomNumber,
            rt.type_name AS roomType,
-           rt.price_per_night AS roomPrice,
+           rt.base_price AS roomPrice,
            u.full_name AS guestName, u.email AS guestEmail, u.phone AS guestPhone,
            p.payment_method AS paymentMethod, p.payment_status AS paymentStatus,
            p.transaction_id AS transactionId, p.amount AS paidAmount
     FROM bookings b
     JOIN rooms r ON b.room_id = r.id
     JOIN room_types rt ON r.room_type_id = rt.id
-    JOIN users u ON b.guest_id = u.id
+    JOIN users u ON b.user_id = u.id
     LEFT JOIN payments p ON p.booking_id = b.id`;
   const params = [];
 
   if (userId && role !== "admin" && role !== "staff") {
-    query += " WHERE b.guest_id = ?";
+    query += " WHERE b.user_id = ?";
     params.push(userId);
   }
 
   query += " ORDER BY b.created_at DESC";
   const [rows] = await pool.execute(query, params);
-  return rows.map(r => ({
+  return rows.map((r) => ({
     ...r,
-    services: r.services ? (typeof r.services === "string" ? JSON.parse(r.services) : r.services) : [],
+    services: r.services
+      ? typeof r.services === "string"
+        ? JSON.parse(r.services)
+        : r.services
+      : [],
   }));
 };
 
 const getBookingById = async (id) => {
   const [rows] = await pool.execute(
-    `SELECT b.id, b.guest_id AS guestId, b.room_id AS roomId,
+    `SELECT b.id, b.user_id AS userId, b.room_id AS roomId,
             b.check_in AS checkIn, b.check_out AS checkOut,
             b.adults, b.children, b.total_amount AS totalAmount,
             b.booking_status AS status, b.created_at AS createdAt,
@@ -75,14 +79,14 @@ const getBookingById = async (id) => {
             b.special_requests AS specialRequests,
             r.room_number AS roomNumber,
             rt.type_name AS roomType,
-            rt.price_per_night AS roomPrice,
+            rt.base_price AS roomPrice,
             u.full_name AS guestName, u.email AS guestEmail, u.phone AS guestPhone,
             p.payment_method AS paymentMethod, p.payment_status AS paymentStatus,
             p.transaction_id AS transactionId, p.amount AS paidAmount
      FROM bookings b
      JOIN rooms r ON b.room_id = r.id
      JOIN room_types rt ON r.room_type_id = rt.id
-     JOIN users u ON b.guest_id = u.id
+     JOIN users u ON b.user_id = u.id
      LEFT JOIN payments p ON p.booking_id = b.id
      WHERE b.id = ?`,
     [id],
@@ -91,19 +95,23 @@ const getBookingById = async (id) => {
   if (!row) return undefined;
   return {
     ...row,
-    services: row.services ? (typeof row.services === "string" ? JSON.parse(row.services) : row.services) : [],
+    services: row.services
+      ? typeof row.services === "string"
+        ? JSON.parse(row.services)
+        : row.services
+      : [],
   };
 };
 
 const updateBooking = async (id, data) => {
   // Only allow updating these specific columns — prevents SQL errors from extra fields
   const ALLOWED = {
-    booking_status  : "booking_status",
-    status          : "booking_status",
-    adults          : "adults",
-    children        : "children",
+    booking_status: "booking_status",
+    status: "booking_status",
+    adults: "adults",
+    children: "children",
     special_requests: "special_requests",
-    total_amount    : "total_amount",
+    total_amount: "total_amount",
   };
 
   const fields = [];
@@ -168,11 +176,11 @@ const getPayments = async (userId = null) => {
            u.full_name AS guestName
     FROM payments p
     JOIN bookings b ON p.booking_id = b.id
-    JOIN users u ON b.guest_id = u.id`;
+    JOIN users u ON b.user_id = u.id`;
   const params = [];
 
   if (userId) {
-    query += " WHERE b.guest_id = ?";
+    query += " WHERE b.user_id = ?";
     params.push(userId);
   }
 
