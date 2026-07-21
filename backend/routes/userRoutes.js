@@ -200,6 +200,14 @@ router.post(
       }
       const amount = req.body.amount || sp[0].salary;
       const today = new Date().toISOString().split("T")[0];
+      const periodFrom = new Date(today);
+      periodFrom.setDate(1);
+
+      const periodTo = new Date(
+        periodFrom.getFullYear(),
+        periodFrom.getMonth() + 1,
+        0,
+      );
       await pool.query(
         `INSERT INTO salary_payments
   (
@@ -207,16 +215,20 @@ router.post(
     amount,
     payment_date,
     payment_mode,
+    period_from,
+    period_to,
     status,
     remarks,
     processed_by
   )
-  VALUES (?,?,?,?,?,?,?)`,
+  VALUES (?,?,?,?,?,?,?,?,?)`,
         [
           sp[0].id,
           amount,
           today,
           "bank_transfer",
+          periodFrom.toISOString().split("T")[0],
+          periodTo.toISOString().split("T")[0],
           "paid",
           req.body.remarks || `Salary for ${sp[0].position}`,
           req.user.id,
