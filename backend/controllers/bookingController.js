@@ -44,12 +44,10 @@ const createBooking = async (req, res, next) => {
           [guestId],
         );
         if (!guestRows[0]) {
-          return res
-            .status(404)
-            .json({
-              success: false,
-              message: `Guest with id ${guestId} not found`,
-            });
+          return res.status(404).json({
+            success: false,
+            message: `Guest with id ${guestId} not found`,
+          });
         }
         resolvedGuestId = guestRows[0].id;
       } else if (guestEmail) {
@@ -58,12 +56,10 @@ const createBooking = async (req, res, next) => {
           [guestEmail.toLowerCase().trim()],
         );
         if (!guestRows[0]) {
-          return res
-            .status(404)
-            .json({
-              success: false,
-              message: `No user found with email: ${guestEmail}`,
-            });
+          return res.status(404).json({
+            success: false,
+            message: `No user found with email: ${guestEmail}`,
+          });
         }
         resolvedGuestId = guestRows[0].id;
       }
@@ -144,7 +140,9 @@ const createBooking = async (req, res, next) => {
       )
         ? paymentMethod
         : "cash",
-      status: "paid",
+
+      status: "completed",
+
       transaction_id: `TXN-${Date.now()}-${bookingId}`,
     });
     await pool.execute(
