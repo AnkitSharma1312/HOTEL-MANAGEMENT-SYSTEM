@@ -1,197 +1,176 @@
-/**
- * =============================================================
- *  userModel.js
- *  Hotel Management System — User Database Model
- *
- *  All direct MySQL queries for the `users` table live here.
- *  authController.js handles bcrypt hashing — this model
- *  only does raw DB operations.
- * =============================================================
- */
-
 "use strict";
 
 const { pool } = require("../config/db");
 const bcrypt = require("bcrypt");
 
-const BCRYPT_ROUNDS = 10;
+const SALT_ROUNDS = 10;
 
-// =============================================================
-//  CREATE USER
-//  Inserts a new user into the `users` table.
-//  NOTE: password field can be:
-//    - A plain-text password (will be hashed here)
-//    - An already-hashed string starting with '$2b$' (stored as-is)
-// =============================================================
 const createUser = async ({
-  name,
   fullName,
+  name,
   email,
   password,
   role = "guest",
   phone = "",
 }) => {
-  const displayName = fullName || name || "Guest";
+  const userName = (fullName || name || "").trim();
 
-  // If password is already hashed by controller, store as-is
-  // If plain text, hash it here (fallback safety)
-  const storedPassword =
-    password.startsWith("$2b$") || password.startsWith("$2a$")
+  const passwordHash =
+    password.startsWith("$2a$") ||
+    password.startsWith("$2b$") ||
+    password.startsWith("$2y$")
       ? password
-      : await bcrypt.hash(password, BCRYPT_ROUNDS);
+      : await bcrypt.hash(password, SALT_ROUNDS);
 
   const [result] = await pool.execute(
-    `INSERT INTO users
-       (full_name, email, password_hash, role, phone)
-     VALUES (?, ?, ?, ?, ?)`,
-    [
-      displayName,
-      email.toLowerCase().trim(),
-      storedPassword,
-      ["guest", "staff", "admin"].includes(role) ? role : "guest",
-      phone || "",
-    ],
+    `
+    INSERT INTO users
+    (
+      full_name,
+      email,
+      password_hash,
+      role,
+      phone
+    )
+    VALUES (?, ?, ?, ?, ?)
+    `,
+    [userName, email.trim().toLowerCase(), passwordHash, role, phone || null],
   );
 
   return result.insertId;
 };
 
-// =============================================================
-//  FIND BY EMAIL
-//  Returns user row including password hash (for bcrypt.compare)
-//  Returns undefined if not found
-// =============================================================
 const findByEmail = async (email) => {
   const [rows] = await pool.execute(
-    `SELECT
-       id,
-       full_name  AS name,
-       email,
-       password_hash AS password,
-       role,
-       phone,
-       1          AS is_active,
-       created_at AS createdAt
-     FROM users
-     WHERE email = ?
-     LIMIT 1`,
-    [email.toLowerCase().trim()],
+    `
+    SELECT
+      id,
+      full_name,
+      email,
+      password_hash,
+      role,
+      phone,
+      created_at
+    FROM users
+    WHERE email = ?
+    LIMIT 1
+    `,
+    [email.trim().toLowerCase()],
   );
-  return rows[0];
+
+  return rows.length ? rows[0] : null;
 };
 
-// =============================================================
-//  FIND BY ID
-//  Returns user WITHOUT password hash (safe for sending to client)
-// =========================================================={
 const findById = async (id) => {
   const [rows] = await pool.execute(
-    `SELECT
+    `
+    SELECT
       id,
-      full_name AS name,
+      full_name,
       email,
       role,
       phone,
-      is_active,
-      created_at AS createdAt
+      created_at
     FROM users
-    WHERE id = ?
-    LIMIT 1`,
+    WHERE id=?
+    LIMIT 1
+    `,
     [id],
   );
 
-  return rows[0];
+  return rows.length ? rows[0] : null;
 };
 
-// =============================================================
-//  UPDATE PROFILE
-//  Updates allowed profile fields for a given user ID
-// =============================================================
-const updateProfile = async (id, data) => {
-  // Map frontend field names to DB column names
-  const FIELD_MAP = {
-    name: "full_name",
-    fullName: "full_name",
-    full_name: "full_name",
-    email: "email",
-    phone: "phone",
-    address: "address",
-  };
+const comparePassword = async (plain, hash) => {
+  return bcrypt.compare(plain, hash);
+};
 
-  const fields = [];
-  const values = [];
+const updatePassword = async (id, password) => {
+  const hash = await bcrypt.hash(password, SALT_ROUNDS);
 
-  Object.entries(data).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && FIELD_MAP[key]) {
-      fields.push(`${FIELD_MAP[key]} = ?`);
-      values.push(value);
-    }
-  });
-
-  if (fields.length === 0) return false;
-
-  values.push(id);
   await pool.execute(
-    `UPDATE users SET ${fields.join(", ")} WHERE id = ?`,
-    values,
+    `
+    UPDATE users
+    SET password_hash=?
+    WHERE id=?
+    `,
+    [hash, id],
   );
+
   return true;
 };
 
-// =============================================================
-//  UPDATE PASSWORD
-//  Hashes new password and saves to DB
-// =============================================================
-const updatePassword = async (id, newPlainPassword) => {
-  const hashedPassword = await bcrypt.hash(newPlainPassword, BCRYPT_ROUNDS);
-  await pool.execute("UPDATE users SET password_hash = ? WHERE id = ?", [
-    hashedPassword,
-    id,
-  ]);
-};
+const updateProfile = async (id, data) => {
+  const fields = [];
+  const values = [];
 
-// =============================================================
-//  COMPARE PASSWORD
-//  Wrapper for bcrypt.compare — used in older code paths
-// =============================================================
-const comparePassword = async (plainPassword, hashedPassword) => {
-  return bcrypt.compare(plainPassword, hashedPassword);
-};
-
-// =============================================================
-//  GET ALL USERS (Admin)
-// =============================================================
-const getAllUsers = async (roleFilter = null) => {
-  let query = `
-    SELECT id, full_name AS name, email, role, phone,
-           1 AS is_active, created_at AS createdAt
-    FROM users`;
-  const params = [];
-
-  if (roleFilter) {
-    query += " WHERE role = ?";
-    params.push(roleFilter);
+  if (data.full_name !== undefined) {
+    fields.push("full_name=?");
+    values.push(data.full_name);
   }
 
-  query += " ORDER BY created_at DESC";
-  const [rows] = await pool.execute(query, params);
+  if (data.phone !== undefined) {
+    fields.push("phone=?");
+    values.push(data.phone);
+  }
+
+  if (data.email !== undefined) {
+    fields.push("email=?");
+    values.push(data.email.trim().toLowerCase());
+  }
+
+  if (!fields.length) return false;
+
+  values.push(id);
+
+  await pool.execute(
+    `
+    UPDATE users
+    SET ${fields.join(",")}
+    WHERE id=?
+    `,
+    values,
+  );
+
+  return true;
+};
+
+const getAllUsers = async (role = null) => {
+  let sql = `
+  SELECT
+    id,
+    full_name,
+    email,
+    role,
+    phone,
+    created_at
+  FROM users`;
+
+  const params = [];
+
+  if (role) {
+    sql += " WHERE role=?";
+    params.push(role);
+  }
+
+  sql += " ORDER BY id DESC";
+
+  const [rows] = await pool.execute(sql, params);
+
   return rows;
 };
 
-// =============================================================
-//  DELETE USER (Admin)
-// =============================================================
 const deleteUser = async (id) => {
-  await pool.execute("DELETE FROM users WHERE id = ?", [id]);
+  await pool.execute("DELETE FROM users WHERE id=?", [id]);
 };
 
 module.exports = {
   createUser,
   findByEmail,
   findById,
-  updateProfile,
-  updatePassword,
   comparePassword,
+  updatePassword,
+  updateProfile,
   getAllUsers,
   deleteUser,
 };

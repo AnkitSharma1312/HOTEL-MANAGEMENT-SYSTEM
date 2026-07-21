@@ -5,7 +5,7 @@ const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const dotenv = require("dotenv");
 const path = require("path");
-const { initializeDatabase } = require("./config/db");
+require("./config/db");
 
 dotenv.config({ path: path.resolve(__dirname, ".env"), override: true });
 
@@ -62,13 +62,9 @@ app.use((err, req, res, next) => {
   res.status(err.statusCode || 500).json({
     success: false,
     message: err.message,
-    stack: err.stack,
+})
   });
 });
-(async () => {
-  await initializeDatabase();
-
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
-})();
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

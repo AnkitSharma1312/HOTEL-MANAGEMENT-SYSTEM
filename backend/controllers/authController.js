@@ -18,8 +18,8 @@
  *    - DB errors handled separately from validation errors
  * =============================================================
  */
-console.log("AUTH CONTROLLER LOADED");
-("use strict");
+
+"use strict";
 
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
@@ -109,9 +109,9 @@ const isDBConnectionError = (error) =>
 //    5. Generate JWT token
 //    6. Return user + token
 // =============================================================
-const register = async (req, res, next) => console.log("REGISTER FUNCTION HIT");
-console.log(req.body);
-{
+const register = async (req, res, next) => {
+  console.log("REGISTER FUNCTION HIT");
+  console.log(req.body);
   try {
     // ── 1. Extract fields (support multiple name formats) ───
     const {
@@ -254,7 +254,7 @@ console.log(req.body);
     // Pass to global error handler in server.js
     next(error);
   }
-}
+};
 
 // =============================================================
 //  LOGIN
@@ -310,23 +310,14 @@ const login = async (req, res, next) => {
     // bcrypt.compare() timing is constant — not vulnerable to timing attacks
     console.log("input password from request body:", password);
     console.log("user object from database:", user);
-    console.log("type of user.password:", typeof user.password);
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    console.log("type of user.password:", typeof user.password_hash);
+    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
     console.log("isPasswordValid?", isPasswordValid);
 
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
         message: INVALID_CREDENTIALS_MSG,
-      });
-    }
-
-    // ── 4. Check if account is active ────────────────────────
-    // (is_active field in users table)
-    if (user.is_active === 0) {
-      return res.status(403).json({
-        success: false,
-        message: "Your account has been deactivated. Please contact support.",
       });
     }
 

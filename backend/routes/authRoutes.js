@@ -26,11 +26,14 @@ const validate = (req, res, next) => {
 router.post(
   "/register",
   [
-    body("name").optional().isString(),
+    body("fullName").optional().isString(),
     body("firstName").optional().isString(),
     body("lastName").optional().isString(),
     body("email").isEmail().withMessage("Valid email is required"),
     body("password")
+      .trim()
+      .notEmpty()
+      .withMessage("Password is required")
       .isLength({ min: 6 })
       .withMessage("Password must be at least 6 characters"),
   ],

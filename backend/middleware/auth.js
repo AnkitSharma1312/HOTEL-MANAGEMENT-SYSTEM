@@ -14,7 +14,7 @@
 
 "use strict";
 
-const jwt        = require("jsonwebtoken");
+const jwt = require("jsonwebtoken");
 const { findById } = require("../models/userModel");
 
 const auth = async (req, res, next) => {
@@ -34,8 +34,8 @@ const auth = async (req, res, next) => {
     // ── 2. Token not provided ────────────────────────────────
     if (!token) {
       return res.status(401).json({
-        success : false,
-        message : "Access denied. Please login to continue.",
+        success: false,
+        message: "Access denied. Please login to continue.",
       });
     }
 
@@ -47,16 +47,16 @@ const auth = async (req, res, next) => {
       // Token expired
       if (jwtError.name === "TokenExpiredError") {
         return res.status(401).json({
-          success   : false,
-          message   : "Your session has expired. Please login again.",
-          errorCode : "TOKEN_EXPIRED",
+          success: false,
+          message: "Your session has expired. Please login again.",
+          errorCode: "TOKEN_EXPIRED",
         });
       }
       // Token malformed / invalid signature
       return res.status(401).json({
-        success   : false,
-        message   : "Invalid authentication token. Please login again.",
-        errorCode : "TOKEN_INVALID",
+        success: false,
+        message: "Invalid authentication token. Please login again.",
+        errorCode: "TOKEN_INVALID",
       });
     }
 
@@ -65,30 +65,20 @@ const auth = async (req, res, next) => {
 
     if (!user) {
       return res.status(401).json({
-        success   : false,
-        message   : "User account not found. It may have been deleted.",
-        errorCode : "USER_NOT_FOUND",
-      });
-    }
-
-    // ── 5. Check account is active ───────────────────────────
-    if (user.is_active === 0) {
-      return res.status(403).json({
-        success   : false,
-        message   : "Your account has been deactivated. Please contact support.",
-        errorCode : "ACCOUNT_INACTIVE",
+        success: false,
+        message: "User account not found. It may have been deleted.",
+        errorCode: "USER_NOT_FOUND",
       });
     }
 
     // ── 6. Attach user to request ────────────────────────────
     req.user = user;
     next();
-
   } catch (error) {
     // DB connection error or unexpected error
     return res.status(500).json({
-      success : false,
-      message : "Authentication check failed. Please try again.",
+      success: false,
+      message: "Authentication check failed. Please try again.",
     });
   }
 };
