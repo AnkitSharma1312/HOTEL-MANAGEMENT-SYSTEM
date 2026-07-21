@@ -11,13 +11,11 @@ const router = express.Router();
 const validate = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty())
-    return res
-      .status(400)
-      .json({
-        success: false,
-        message: "Validation failed",
-        errors: errors.array(),
-      });
+    return res.status(400).json({
+      success: false,
+      message: "Validation failed",
+      errors: errors.array(),
+    });
   next();
 };
 
@@ -36,14 +34,12 @@ router.get("/", auth, role("admin", "staff"), async (req, res, next) => {
     }
     query += " ORDER BY full_name ASC";
     const [rows] = await pool.query(query, params);
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Users fetched",
-        data: rows,
-        users: rows,
-      });
+    res.status(200).json({
+      success: true,
+      message: "Users fetched",
+      data: rows,
+      users: rows,
+    });
   } catch (err) {
     next(err);
   }
@@ -64,14 +60,12 @@ router.put("/profile", auth, async (req, res, next) => {
       "SELECT id, full_name AS name, email, role, phone, created_at AS createdAt FROM users WHERE id = ?",
       [req.user.id],
     );
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "Profile updated",
-        data: { user: rows[0] },
-        user: rows[0],
-      });
+    res.status(200).json({
+      success: true,
+      message: "Profile updated",
+      data: { user: rows[0] },
+      user: rows[0],
+    });
   } catch (err) {
     next(err);
   }
@@ -103,14 +97,12 @@ router.post(
         "SELECT id, full_name AS name, email, role, phone, created_at AS createdAt FROM users WHERE id = ?",
         [id],
       );
-      res
-        .status(201)
-        .json({
-          success: true,
-          message: "Staff user created",
-          data: { user: rows[0] },
-          user: rows[0],
-        });
+      res.status(201).json({
+        success: true,
+        message: "Staff user created",
+        data: { user: rows[0] },
+        user: rows[0],
+      });
     } catch (err) {
       next(err);
     }
@@ -126,7 +118,7 @@ router.get("/staff-profiles", auth, role("admin"), async (req, res, next) => {
              COALESCE(sp.department, 'Front Desk') AS department,
              COALESCE(sp.salary, 0)               AS salary,
              sp.joining_date                       AS joiningDate,
-             sp.last_payment_date                     AS lastPaymentDate,
+             sp.last_paid_date                     AS lastPaidDate,
              sp.id                                 AS profileId
       FROM users u
       LEFT JOIN staff_profiles sp ON sp.user_id = u.id
@@ -209,17 +201,29 @@ router.post(
       const amount = req.body.amount || sp[0].salary;
       const today = new Date().toISOString().split("T")[0];
       await pool.query(
-        "INSERT INTO salary_payments (staff_id, amount, payment_date, remarks, paid_by) VALUES (?,?,?,?,?)",
+        `INSERT INTO salary_payments
+  (
+    staff_id,
+    amount,
+    payment_date,
+    payment_mode,
+    status,
+    remarks,
+    processed_by
+  )
+  VALUES (?,?,?,?,?,?,?)`,
         [
           sp[0].id,
           amount,
           today,
-          req.body.remarks || "Salary for " + sp[0].position,
+          "bank_transfer",
+          "paid",
+          req.body.remarks || `Salary for ${sp[0].position}`,
           req.user.id,
         ],
       );
       await pool.query(
-        "UPDATE staff_profiles SET last_payment_date=? WHERE user_id=?",
+        "UPDATE staff_profiles SET last_paid_date=? WHERE user_id=?",
         [today, uid],
       );
       res.status(201).json({
@@ -249,7 +253,18 @@ router.get(
       );
       if (!sp[0]) return res.status(200).json({ success: true, payments: [] });
       const [rows] = await pool.query(
-        "SELECT id, amount, payment_date AS paymentDate, remarks, created_at AS createdAt FROM salary_payments WHERE staff_id=? ORDER BY paid_date DESC LIMIT 20",
+        `SELECT
+      id,
+      amount,
+      payment_date AS paymentDate,
+      payment_mode,
+      status,
+      remarks,
+      created_at AS createdAt
+   FROM salary_payments
+   WHERE staff_id=?
+   ORDER BY payment_date DESC
+   LIMIT 20`,
         [sp[0].id],
       );
       res.status(200).json({ success: true, payments: rows });
@@ -272,14 +287,12 @@ router.get("/:id", auth, role("admin"), async (req, res, next) => {
       return res
         .status(404)
         .json({ success: false, message: "User not found" });
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "User fetched",
-        data: { user: rows[0] },
-        user: rows[0],
-      });
+    res.status(200).json({
+      success: true,
+      message: "User fetched",
+      data: { user: rows[0] },
+      user: rows[0],
+    });
   } catch (err) {
     next(err);
   }
