@@ -181,9 +181,17 @@ router.post(
   role("admin"),
   async (req, res, next) => {
     try {
-      const uid = req.params.userId;
       const [sp] = await pool.query(
-        "SELECT id, salary, position FROM staff_profiles WHERE user_id=?",
+        `
+SELECT
+    sp.salary,
+    sp.position,
+    s.id AS staffId
+FROM staff_profiles sp
+JOIN staff s
+ON s.user_id = sp.user_id
+WHERE sp.user_id = ?
+`,
         [uid],
       );
       if (!sp[0]) {
@@ -209,27 +217,38 @@ router.post(
         0,
       );
       await pool.query(
-        `INSERT INTO salary_payments
-  (
-    staff_id,
-    amount,
-    payment_date,
-    payment_mode,
-    period_from,
-    period_to,
-    status,
-    remarks,
-    processed_by
-  )
-  VALUES (?,?,?,?,?,?,?,?,?)`,
+        `
+INSERT INTO salary_payments
+(
+staff_id,
+amount,
+payment_date,
+payment_mode,
+period_from,
+period_to,
+status,
+remarks,
+processed_by
+)
+VALUES
+(
+?,
+?,
+?,
+'bank_transfer',
+?,
+?,
+'paid',
+?,
+?
+)
+`,
         [
-          sp[0].id,
+          sp[0].staffId,
           amount,
           today,
-          "bank_transfer",
-          periodFrom.toISOString().split("T")[0],
-          periodTo.toISOString().split("T")[0],
-          "paid",
+          today,
+          today,
           req.body.remarks || `Salary for ${sp[0].position}`,
           req.user.id,
         ],
