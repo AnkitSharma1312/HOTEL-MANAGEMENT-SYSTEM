@@ -139,10 +139,10 @@ router.put(
   async (req, res, next) => {
     try {
       const { position, department, salary, joining_date } = req.body;
-      const uid = req.params.userId;
+      const userId = req.params.userId;
       const [ex] = await pool.query(
         "SELECT id FROM staff_profiles WHERE user_id=?",
-        [uid],
+        [userId],
       );
       if (ex[0]) {
         await pool.query(
@@ -152,14 +152,14 @@ router.put(
             department || "Front Desk",
             salary || 0,
             joining_date || null,
-            uid,
+            userId,
           ],
         );
       } else {
         await pool.query(
           "INSERT INTO staff_profiles (user_id, position, department, salary, joining_date) VALUES (?,?,?,?,?)",
           [
-            uid,
+            userId,
             position || "Staff",
             department || "Front Desk",
             salary || 0,
@@ -192,17 +192,17 @@ JOIN staff s
 ON s.user_id = sp.user_id
 WHERE sp.user_id = ?
 `,
-        [uid],
+        [userId],
       );
       if (!sp[0]) {
         // Auto-create profile if missing
         await pool.query(
           "INSERT INTO staff_profiles (user_id, position, salary) VALUES (?,?,?)",
-          [uid, "Staff", 25000],
+          [userId, "Staff", 25000],
         );
         const [sp2] = await pool.query(
           "SELECT id, salary, position FROM staff_profiles WHERE user_id=?",
-          [uid],
+          [userId],
         );
         sp[0] = sp2[0];
       }
@@ -255,7 +255,7 @@ VALUES
       );
       await pool.query(
         "UPDATE staff_profiles SET last_paid_date=? WHERE user_id=?",
-        [today, uid],
+        [today, userId],
       );
       res.status(201).json({
         success: true,
