@@ -181,89 +181,72 @@ router.post(
   role("admin"),
   async (req, res, next) => {
     try {
-      const [sp] = await pool.query(
-        `
-SELECT
-    sp.salary,
-    sp.position,
-    s.id AS staffId
-FROM staff_profiles sp
-JOIN staff s
-ON s.user_id = sp.user_id
-WHERE sp.user_id = ?
-`,
+      const userId = Number(req.params.userId);
+
+      let [profile] = await pool.query(
+        "SELECT * FROM staff_profiles WHERE user_id=?",
         [userId],
       );
-      if (!sp[0]) {
-        // Auto-create profile if missing
+
+      if (!profile.length) {
         await pool.query(
-          "INSERT INTO staff_profiles (user_id, position, salary) VALUES (?,?,?)",
-          [userId, "Staff", 25000],
+          `INSERT INTO staff_profiles
+          (user_id,position,department,salary,joining_date)
+          VALUES (?,?,?,?,?)`,
+          [
+            userId,
+            "Staff",
+            "front_desk",
+            req.body.amount || 25000,
+            new Date().toISOString().slice(0, 10),
+          ],
         );
-        const [sp2] = await pool.query(
-          "SELECT id, salary, position FROM staff_profiles WHERE user_id=?",
+
+        [profile] = await pool.query(
+          "SELECT * FROM staff_profiles WHERE user_id=?",
           [userId],
         );
-        sp[0] = sp2[0];
       }
-      const amount = req.body.amount || sp[0].salary;
-      const today = new Date().toISOString().split("T")[0];
-      const periodFrom = new Date(today);
-      periodFrom.setDate(1);
 
-      const periodTo = new Date(
-        periodFrom.getFullYear(),
-        periodFrom.getMonth() + 1,
-        0,
-      );
+      const amount = req.body.amount || profile[0].salary;
+
+      const today = new Date().toISOString().slice(0, 10);
+
       await pool.query(
-        `
-INSERT INTO salary_payments
-(
-staff_id,
-amount,
-payment_date,
-payment_mode,
-period_from,
-period_to,
-status,
-remarks,
-processed_by
-)
-VALUES
-(
-?,
-?,
-?,
-'bank_transfer',
-?,
-?,
-'paid',
-?,
-?
-)
-`,
+        `INSERT INTO salary_payments
+        (
+          staff_id,
+          amount,
+          payment_date,
+          payment_mode,
+          period_from,
+          period_to,
+          status,
+          remarks,
+          processed_by
+        )
+        VALUES (?,?,?,?,?,?,?,?,?)`,
         [
-          sp[0].staffId,
+          profile[0].id,
           amount,
           today,
+          "bank_transfer",
           today,
           today,
-          req.body.remarks || `Salary for ${sp[0].position}`,
+          "paid",
+          req.body.remarks || "Salary",
           req.user.id,
         ],
       );
+
       await pool.query(
-        "UPDATE staff_profiles SET last_paid_date=? WHERE user_id=?",
+        "UPDATE staff_profiles SET last_payment_date=? WHERE user_id=?",
         [today, userId],
       );
-      res.status(201).json({
+
+      res.json({
         success: true,
-        message:
-          "Salary Rs." +
-          Number(amount).toLocaleString("en-IN") +
-          " paid successfully",
-        data: { amount, paidDate: today },
+        message: "Salary paid successfully",
       });
     } catch (err) {
       next(err);
