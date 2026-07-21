@@ -1,5 +1,4 @@
 const { pool } = require("../config/db");
-
 const createBooking = async ({
   user_id,
   room_id,
@@ -12,9 +11,37 @@ const createBooking = async ({
   special_requests = "",
   status = "pending",
 }) => {
+  const bookingRef = `BK${Date.now()}`;
+
+  const discount_amount = 0;
+  const tax_amount = Number((total_amount * 0.12).toFixed(2));
+  const final_amount = Number(
+    (Number(total_amount) - discount_amount + tax_amount).toFixed(2),
+  );
+
   const [result] = await pool.execute(
-    "INSERT INTO bookings (user_id, room_id, check_in, check_out, adults, children, total_amount, booking_status, services, services_total, special_requests) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    `INSERT INTO bookings (
+      booking_ref,
+      user_id,
+      room_id,
+      check_in,
+      check_out,
+      adults,
+      children,
+      total_amount,
+      discount_amount,
+      tax_amount,
+      final_amount,
+      payment_status,
+      booking_status,
+      special_requests,
+      services,
+      services_total,
+      booked_by
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
+      bookingRef,
       user_id,
       room_id,
       check_in_date,
@@ -22,12 +49,18 @@ const createBooking = async ({
       guests,
       0,
       total_amount,
+      discount_amount,
+      tax_amount,
+      final_amount,
+      "paid",
       status,
+      special_requests || "",
       services ? JSON.stringify(services) : null,
       services_total || 0,
-      special_requests || "",
+      user_id,
     ],
   );
+
   return result.insertId;
 };
 
