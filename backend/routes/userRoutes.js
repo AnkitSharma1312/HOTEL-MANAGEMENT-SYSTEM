@@ -207,27 +207,39 @@ router.post(
           [userId],
         );
       }
-
       const amount = req.body.amount || profile[0].salary;
 
       const today = new Date().toISOString().slice(0, 10);
 
+      // Get actual staff.id from staff table
+      const [[staff]] = await pool.query(
+        "SELECT id FROM staff WHERE user_id = ?",
+        [userId],
+      );
+
+      if (!staff) {
+        return res.status(404).json({
+          success: false,
+          message: "Staff record not found",
+        });
+      }
+
       await pool.query(
         `INSERT INTO salary_payments
-        (
-          staff_id,
-          amount,
-          payment_date,
-          payment_mode,
-          period_from,
-          period_to,
-          status,
-          remarks,
-          processed_by
-        )
-        VALUES (?,?,?,?,?,?,?,?,?)`,
+  (
+    staff_id,
+    amount,
+    payment_date,
+    payment_mode,
+    period_from,
+    period_to,
+    status,
+    remarks,
+    processed_by
+  )
+  VALUES (?,?,?,?,?,?,?,?,?)`,
         [
-          profile[0].id,
+          staff.id, // <-- CHANGE HERE
           amount,
           today,
           "bank_transfer",
