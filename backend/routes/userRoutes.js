@@ -225,6 +225,12 @@ router.post(
       }
 
       await pool.query(
+        console.log("========== PAY DEBUG ==========");
+console.log("userId =", userId);
+console.log("profile =", profile[0]);
+console.log("profile.id =", profile[0].id);
+console.log("profile.user_id =", profile[0].user_id);
+console.log("===============================");
         `INSERT INTO salary_payments
   (
     staff_id,
