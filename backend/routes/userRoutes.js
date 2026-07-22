@@ -225,12 +225,6 @@ router.post(
       }
 
       await pool.query(
-        console.log("========== PAY DEBUG ==========");
-console.log("userId =", userId);
-console.log("profile =", profile[0]);
-console.log("profile.id =", profile[0].id);
-console.log("profile.user_id =", profile[0].user_id);
-console.log("===============================");
         `INSERT INTO salary_payments
   (
     staff_id,
@@ -258,7 +252,7 @@ console.log("===============================");
       );
 
       await pool.query(
-        "UPDATE staff_profiles SET last_payment_date=? WHERE user_id=?",
+        "UPDATE staff_profiles SET last_paid_date=? WHERE user_id=?",
         [today, userId],
       );
 

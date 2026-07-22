@@ -192,7 +192,7 @@ const createPayment = async ({
   booking_id,
   amount,
   payment_method,
-  status = "paid",
+  status = "completed",
   transaction_id,
 }) => {
   await pool.execute(
