@@ -1532,7 +1532,7 @@ async function loadAvailableRooms() {
       rooms
         .map(
           (r) =>
-            `<option value="${r.id || r._id}">${UI.escape(r.name || "Room " + r.roomNumber)} — ${UI.escape(r.type || "Standard")} — $${r.price || r.pricePerNight}/night</option>`,
+            `<option value="${r.id || r._id}">${UI.escape(r.name || "Room " + r.roomNumber)} — ${UI.escape(r.type || "Standard")} — ₹${r.price || r.pricePerNight}/night</option>`,
         )
         .join("");
     select.addEventListener("change", async () => {
