@@ -12,7 +12,7 @@ router.get(
   async (req, res, next) => {
     try {
       const [roomRows] = await pool.query(
-        'SELECT COUNT(*) AS totalRooms, SUM(CASE WHEN room_status = "available" THEN 1 ELSE 0 END) AS availableRooms, SUM(CASE WHEN room_status IN ("occupied", "reserved") THEN 1 ELSE 0 END) AS occupied FROM rooms',
+        'SELECT COUNT(*) AS totalRooms, SUM(CASE WHEN status = "available" THEN 1 ELSE 0 END) AS availableRooms, SUM(CASE WHEN status IN ("occupied", "reserved") THEN 1 ELSE 0 END) AS occupied FROM rooms',
       );
       const [guestRows] = await pool.query(
         'SELECT COUNT(*) AS totalGuests FROM users WHERE role = "guest"',
