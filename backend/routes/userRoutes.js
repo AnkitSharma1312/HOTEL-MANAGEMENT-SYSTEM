@@ -273,11 +273,13 @@ router.get(
   role("admin"),
   async (req, res, next) => {
     try {
-      const [sp] = await pool.query(
-        "SELECT id FROM staff_profiles WHERE user_id=?",
-        [req.params.userId],
-      );
-      if (!sp[0]) return res.status(200).json({ success: true, payments: [] });
+      const [staff] = await pool.query("SELECT id FROM staff WHERE user_id=?", [
+        req.params.userId,
+      ]);
+
+      if (!staff[0])
+        return res.status(200).json({ success: true, payments: [] });
+
       const [rows] = await pool.query(
         `SELECT
       id,
@@ -291,7 +293,7 @@ router.get(
    WHERE staff_id=?
    ORDER BY payment_date DESC
    LIMIT 20`,
-        [sp[0].id],
+        [staff[0].id],
       );
       res.status(200).json({ success: true, payments: rows });
     } catch (err) {
